@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up | EduSwati</title>
+<meta name="description" content="Create your free EduSwati account and start learning today.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  :root {
+    --color-primary: #1a3a8f;
+    --color-primary-dark: #14306f;
+    --color-secondary: #ffc642;
+    --color-secondary-dark: #e6ac25;
+    --color-ink: #16213e;
+    --color-success: #16a34a;
+    --color-error: #dc2626;
+  }
+  * { font-family: 'Inter', sans-serif; }
+  h1, h2, h3, .font-display { font-family: 'Poppins', sans-serif; }
+  body { background: #f8f9fb; }
+
+  .swazi-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .brand-panel { background: linear-gradient(160deg, var(--color-primary) 0%, var(--color-primary-dark) 100%); }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: #fff;
+    transition: background-color .2s ease, transform .15s ease, box-shadow .2s ease;
+  }
+  .btn-primary:hover:not(:disabled) { background-color: var(--color-primary-dark); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(26,58,143,0.25); }
+  .btn-primary:active:not(:disabled) { transform: translateY(0); }
+  .btn-primary:disabled { opacity: .7; cursor: not-allowed; transform: none; }
+
+  .field-input { transition: border-color .15s ease, box-shadow .15s ease; }
+  .field-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 4px rgba(26,58,143,0.12); }
+  .field-input.has-error { border-color: var(--color-error) !important; }
+  .field-input.has-error:focus { box-shadow: 0 0 0 4px rgba(220,38,38,0.10); }
+  .field-input.has-success { border-color: var(--color-success) !important; }
+
+  .field-error { display: none; align-items: center; gap: 6px; color: var(--color-error); font-size: 0.8125rem; margin-top: 6px; }
+  .field-error.show { display: flex; }
+  .field-success { display: none; align-items: center; gap: 6px; color: var(--color-success); font-size: 0.8125rem; margin-top: 6px; }
+  .field-success.show { display: flex; }
+
+  .toggle-pw { color: #94a3b8; transition: color .15s ease; }
+  .toggle-pw:hover { color: var(--color-primary); }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .strength-track { height: 5px; border-radius: 999px; background: #e5e9f0; overflow: hidden; }
+  .strength-fill { height: 100%; width: 0%; border-radius: 999px; transition: width .25s ease, background-color .25s ease; }
+
+  .banner-error { display: none; }
+  .banner-error.show { display: flex; }
+
+  select.field-input { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.6' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; }
+</style>
+</head>
+
+<body class="min-h-screen">
+
+<div class="min-h-screen grid lg:grid-cols-2">
+
+  <!-- Brand panel -->
+  <div class="hidden lg:flex brand-panel swazi-pattern relative flex-col justify-between p-12 text-white overflow-hidden">
+    <a href="index.html" class="flex items-center gap-2 relative z-10">
+      <div class="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center">
+        <i class="fa-solid fa-graduation-cap text-lg"></i>
+      </div>
+      <span class="font-display font-semibold text-lg tracking-tight">EduSwati</span>
+    </a>
+
+    <div class="relative z-10 max-w-sm">
+      <h1 class="font-display text-3xl font-semibold leading-tight mb-3">Your grade, your pace, your future starts here.</h1>
+      <p class="text-white/70 text-sm leading-relaxed">Join thousands of Grade 8–12 students using curriculum-aligned lessons, quizzes, and study tools built for Eswatini.</p>
+
+      <ul class="mt-10 space-y-4 text-sm text-white/85">
+        <li class="flex items-center gap-3">
+          <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: var(--color-secondary);"><i class="fa-solid fa-check text-xs" style="color: var(--color-primary-dark);"></i></span>
+          Curriculum-aligned lessons for every subject
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: var(--color-secondary);"><i class="fa-solid fa-check text-xs" style="color: var(--color-primary-dark);"></i></span>
+          Quiz Center &amp; personalised study planner
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: var(--color-secondary);"><i class="fa-solid fa-check text-xs" style="color: var(--color-primary-dark);"></i></span>
+          Pay easily with MTN MoMo or e-Mali
+        </li>
+      </ul>
+    </div>
+
+    <p class="relative z-10 text-white/40 text-xs">&copy; 2026 EduSwati. Built for Eswatini students.</p>
+  </div>
+
+  <!-- Form panel -->
+  <div class="flex flex-col justify-center px-6 py-10 sm:px-12 lg:px-16">
+
+    <a href="index.html" class="lg:hidden flex items-center gap-2 mb-8">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background-color: var(--color-primary);">
+        <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
+      </div>
+      <span class="font-display font-semibold text-lg" style="color: var(--color-ink);">EduSwati</span>
+    </a>
+
+    <div class="w-full max-w-md mx-auto lg:mx-0">
+      <h2 class="font-display text-2xl font-semibold" style="color: var(--color-ink);">Create your account</h2>
+      <p class="text-slate-500 text-sm mt-2 mb-7">It's free — takes less than a minute.</p>
+
+      <div id="form-banner" class="banner-error items-start gap-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 mb-6" role="alert" aria-live="assertive">
+        <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+        <span>Please fix the highlighted fields below.</span>
+      </div>
+
+      <form id="signup-form" action="/register" method="POST" novalidate class="space-y-5">
+
+        <div>
+          <label for="fullname" class="block text-sm font-medium mb-1.5" style="color: var(--color-ink);">Full name</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="text" id="fullname" name="fullname" required autocomplete="name"
+              aria-describedby="fullname-error"
+              class="field-input w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl text-sm"
+              placeholder="Sipho Dlamini">
+          </div>
+          <p id="fullname-error" class="field-error"><i class="fa-solid fa-circle-exclamation"></i><span>Enter your full name.</span></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="col-span-2 sm:col-span-1">
+            <label for="email" class="block text-sm font-medium mb-1.5" style="color: var(--color-ink);">Email address</label>
+            <div class="relative">
+              <i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="email" id="email" name="email" required autocomplete="email"
+                aria-describedby="email-error"
+                class="field-input w-full pl-11 pr-4 py-3 border border-slate-200 rounded-xl text-sm"
+                placeholder="you@example.com">
+            </div>
+            <p id="email-error" class="field-error"><i class="fa-solid fa-circle-exclamation"></i><span>Enter a valid email address.</span></p>
+          </div>
+
+          <div class="col-span-2 sm:col-span-1">
+            <label for="grade" class="block text-sm font-medium mb-1.5" style="color: var(--color-ink);">Grade</label>
+            <div class="relative">
+              <i class="fa-solid fa-layer-group absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <select id="grade" name="grade" required aria-describedby="grade-error"
+                class="field-input w-full pl-11 pr-8 py-3 border border-slate-200 rounded-xl text-sm">
+                <option value="">Choose grade</option>
+                <option>Grade 8</option>
+                <option>Grade 9</option>
+                <option>Grade 10</option>
+                <option>Grade 11</option>
+                <option>Grade 12</option>
+              </select>
+            </div>
+            <p id="grade-error" class="field-error"><i class="fa-solid fa-circle-exclamation"></i><span>Select your grade.</span></p>
+          </div>
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium mb-1.5" style="color: var(--color-ink);">Password</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password"
+              aria-describedby="password-error password-hint"
+              class="field-input w-full pl-11 pr-11 py-3 border border-slate-200 rounded-xl text-sm"
+              placeholder="At least 6 characters">
+            <button type="button" class="toggle-pw absolute right-4 top-1/2 -translate-y-1/2" data-target="password" aria-label="Show password">
+              <i class="fa-solid fa-eye text-sm"></i>
+            </button>
+          </div>
+          <div class="mt-2.5 flex items-center gap-2.5" id="strength-wrap" style="display:none;">
+            <div class="strength-track flex-1"><div id="strength-fill" class="strength-fill"></div></div>
+            <span id="strength-label" class="text-xs font-medium text-slate-500 w-12 text-right">Weak</span>
+          </div>
+          <p id="password-hint" class="text-xs text-slate-400 mt-1.5">Use 6+ characters with a mix of letters and numbers.</p>
+          <p id="password-error" class="field-error"><i class="fa-solid fa-circle-exclamation"></i><span>Password must be at least 6 characters.</span></p>
+        </div>
+
+        <div>
+          <label for="confirm_password" class="block text-sm font-medium mb-1.5" style="color: var(--color-ink);">Confirm password</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password"
+              aria-describedby="confirm-error"
+              class="field-input w-full pl-11 pr-11 py-3 border border-slate-200 rounded-xl text-sm"
+              placeholder="Re-enter your password">
+            <button type="button" class="toggle-pw absolute right-4 top-1/2 -translate-y-1/2" data-target="confirm_password" aria-label="Show password">
+              <i class="fa-solid fa-eye text-sm"></i>
+            </button>
+          </div>
+          <p id="confirm-error" class="field-error"><i class="fa-solid fa-circle-exclamation"></i><span>Passwords don't match.</span></p>
+          <p id="confirm-success" class="field-success"><i class="fa-solid fa-circle-check"></i><span>Passwords match.</span></p>
+        </div>
+
+        <label class="flex items-start gap-2.5 text-sm text-slate-600 select-none cursor-pointer pt-1">
+          <input type="checkbox" id="terms" name="terms" required class="w-4 h-4 rounded border-slate-300 mt-0.5" style="accent-color: var(--color-primary);">
+          <span>I agree to the <a href="#" class="font-medium hover:underline" style="color: var(--color-primary);">Terms of Service</a> and <a href="#" class="font-medium hover:underline" style="color: var(--color-primary);">Privacy Policy</a></span>
+        </label>
+        <p id="terms-error" class="field-error"><i class="fa-solid fa-circle-exclamation"></i><span>You must accept the terms to continue.</span></p>
+
+        <button type="submit" id="submit-btn" class="btn-primary w-full py-3 rounded-xl font-medium text-sm flex items-center justify-center gap-2">
+          <span id="btn-text">Create account</span>
+        </button>
+
+        <p class="text-center text-sm text-slate-500 pt-1">
+          Already have an account?
+          <a href="login.html" class="font-semibold hover:underline" style="color: var(--color-primary);">Log in</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.toggle-pw').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      const icon = btn.querySelector('i');
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      icon.classList.toggle('fa-eye', !isHidden);
+      icon.classList.toggle('fa-eye-slash', isHidden);
+      btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
+  });
+
+  function setFieldError(input, errorEl, show) {
+    input.classList.toggle('has-error', show);
+    if (errorEl) errorEl.classList.toggle('show', show);
+    input.setAttribute('aria-invalid', show ? 'true' : 'false');
+  }
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  const form = document.getElementById('signup-form');
+  const fullname = document.getElementById('fullname');
+  const email = document.getElementById('email');
+  const grade = document.getElementById('grade');
+  const password = document.getElementById('password');
+  const confirm = document.getElementById('confirm_password');
+  const terms = document.getElementById('terms');
+
+  const fullnameError = document.getElementById('fullname-error');
+  const emailError = document.getElementById('email-error');
+  const gradeError = document.getElementById('grade-error');
+  const passwordError = document.getElementById('password-error');
+  const confirmError = document.getElementById('confirm-error');
+  const confirmSuccess = document.getElementById('confirm-success');
+  const termsError = document.getElementById('terms-error');
+
+  const strengthWrap = document.getElementById('strength-wrap');
+  const strengthFill = document.getElementById('strength-fill');
+  const strengthLabel = document.getElementById('strength-label');
+  const submitBtn = document.getElementById('submit-btn');
+  const btnText = document.getElementById('btn-text');
+  const banner = document.getElementById('form-banner');
+
+  function scorePassword(value) {
+    let score = 0;
+    if (value.length >= 6) score++;
+    if (value.length >= 10) score++;
+    if (/[0-9]/.test(value) && /[a-zA-Z]/.test(value)) score++;
+    if (/[^a-zA-Z0-9]/.test(value)) score++;
+    return score; // 0-4
+  }
+
+  password.addEventListener('input', () => {
+    const value = password.value;
+    if (value.length === 0) {
+      strengthWrap.style.display = 'none';
+    } else {
+      strengthWrap.style.display = 'flex';
+      const score = scorePassword(value);
+      const levels = [
+        { width: '25%', color: '#dc2626', label: 'Weak' },
+        { width: '50%', color: '#f59e0b', label: 'Fair' },
+        { width: '75%', color: '#3b82f6', label: 'Good' },
+        { width: '100%', color: '#16a34a', label: 'Strong' },
+      ];
+      const lvl = levels[Math.min(score, 3)];
+      strengthFill.style.width = lvl.width;
+      strengthFill.style.backgroundColor = lvl.color;
+      strengthLabel.textContent = lvl.label;
+      strengthLabel.style.color = lvl.color;
+    }
+    if (value.length >= 6) setFieldError(password, passwordError, false);
+    if (confirm.value) checkMatch();
+  });
+
+  function checkMatch() {
+    const match = confirm.value.length > 0 && confirm.value === password.value;
+    const mismatch = confirm.value.length > 0 && confirm.value !== password.value;
+    setFieldError(confirm, confirmError, mismatch);
+    confirmSuccess.classList.toggle('show', match);
+    confirm.classList.toggle('has-success', match);
+  }
+  confirm.addEventListener('input', checkMatch);
+
+  fullname.addEventListener('blur', () => setFieldError(fullname, fullnameError, fullname.value.trim() === ''));
+  email.addEventListener('blur', () => setFieldError(email, emailError, email.value.trim() !== '' && !isValidEmail(email.value)));
+  grade.addEventListener('change', () => setFieldError(grade, gradeError, grade.value === ''));
+  terms.addEventListener('change', () => { if (terms.checked) termsError.classList.remove('show'); });
+
+  form.addEventListener('submit', (e) => {
+    banner.classList.remove('show');
+    let valid = true;
+
+    if (fullname.value.trim() === '') { setFieldError(fullname, fullnameError, true); valid = false; } else setFieldError(fullname, fullnameError, false);
+    if (!isValidEmail(email.value.trim())) { setFieldError(email, emailError, true); valid = false; } else setFieldError(email, emailError, false);
+    if (grade.value === '') { setFieldError(grade, gradeError, true); valid = false; } else setFieldError(grade, gradeError, false);
+    if (password.value.length < 6) { setFieldError(password, passwordError, true); valid = false; } else setFieldError(password, passwordError, false);
+    if (confirm.value !== password.value || confirm.value === '') { setFieldError(confirm, confirmError, true); valid = false; } else setFieldError(confirm, confirmError, false);
+    if (!terms.checked) { termsError.classList.add('show'); valid = false; } else termsError.classList.remove('show');
+
+    if (!valid) {
+      e.preventDefault();
+      banner.classList.add('show');
+      const firstInvalid = form.querySelector('.has-error');
+      if (firstInvalid) firstInvalid.focus();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    btnText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating your account…';
+  });
+</script>
+
+</body>
+</html>
