@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>EduSwati — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --admin: #0f2464;
+  --admin-mid: #1e3a96;
+  --admin-light: #2548b5;
+  --gold: #ffc642;
+  --gold-dark: #d9a520;
+  --bg: #f0f2f8;
+  --surface: #ffffff;
+  --surface2: #e8ebf5;
+  --text: #1a1e2e;
+  --text-muted: #6b748e;
+  --border: rgba(15,36,100,0.12);
+  --success: #1a9e6e;
+  --danger: #d84444;
+  --warning: #d98c00;
+  --sidebar-w: 240px;
+  --radius: 14px;
+  --transition: 0.22s cubic-bezier(.4,0,.2,1);
+  --topbar-h: 60px;
+  --mobile-nav-h: 60px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  font-size: 14px;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 { font-family: 'Syne', sans-serif; }
+
+/* ─── OVERLAY ─── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 90; opacity: 0;
+  transition: opacity 0.25s;
+}
+.sidebar-overlay.active { display: block; opacity: 1; }
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--admin);
+  min-height: 100vh;
+  position: fixed; top: 0; left: 0;
+  display: flex; flex-direction: column;
+  z-index: 100;
+  transition: transform var(--transition);
+}
+
+.sidebar-brand {
+  padding: 22px 20px 16px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.brand-mark {
+  width: 36px; height: 36px;
+  background: var(--gold);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 15px; color: var(--admin); flex-shrink: 0;
+}
+
+.brand-name { color: #fff; font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+.brand-tag {
+  color: var(--gold); font-size: 10px; letter-spacing: 0.8px;
+  text-transform: uppercase; font-weight: 600;
+}
+
+.sidebar-close-btn {
+  display: none; margin-left: auto;
+  background: none; border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 18px; cursor: pointer; padding: 4px;
+}
+
+.sidebar-section { padding: 16px 12px 6px; }
+.section-label {
+  font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); font-weight: 500; padding: 0 8px; margin-bottom: 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 9px; cursor: pointer;
+  color: rgba(255,255,255,0.65); transition: all var(--transition);
+  margin-bottom: 2px; font-size: 13.5px; font-weight: 400;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item i { width: 18px; text-align: center; font-size: 15px; flex-shrink: 0; }
+.nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.nav-item.active { background: rgba(255,198,66,0.18); color: var(--gold); }
+.nav-item .badge {
+  margin-left: auto; background: var(--danger); color: #fff;
+  font-size: 10px; font-weight: 700; border-radius: 20px; padding: 1px 7px;
+}
+
+.sidebar-bottom {
+  margin-top: auto; padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.user-chip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: 9px; cursor: pointer;
+}
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px; color: var(--admin); flex-shrink: 0;
+}
+.user-chip .uname { color: #fff; font-size: 13px; font-weight: 500; }
+.user-chip .urole { color: var(--gold); font-size: 11px; font-weight: 500; }
+
+/* ─── MAIN LAYOUT ─── */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1; min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ─── TOPBAR ─── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: var(--topbar-h);
+  display: flex; align-items: center; gap: 14px;
+  position: sticky; top: 0; z-index: 50;
+}
+
+.admin-badge {
+  background: var(--admin); color: #fff;
+  font-size: 10px; font-weight: 700; padding: 3px 10px;
+  border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.menu-toggle {
+  display: none;
+  background: none; border: none; cursor: pointer;
+  color: var(--text); font-size: 18px; padding: 4px; flex-shrink: 0;
+}
+
+.topbar-info { flex: 1; min-width: 0; }
+.topbar-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar-sub { color: var(--text-muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.icon-btn {
+  width: 36px; height: 36px; border-radius: 9px;
+  border: 1px solid var(--border); background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-muted); transition: all var(--transition);
+  flex-shrink: 0;
+}
+.icon-btn:hover { background: var(--admin); color: #fff; border-color: var(--admin); }
+
+.content { padding: 20px; flex: 1; }
+
+/* ─── PAGES ─── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ─── STATS GRID ─── */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--surface); border-radius: var(--radius);
+  padding: 16px 18px; border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.stat-card::after {
+  content: ''; position: absolute; right: -10px; bottom: -10px;
+  width: 70px; height: 70px; border-radius: 50%;
+  background: var(--admin); opacity: 0.04;
+}
+.stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; }
+.stat-val { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; color: var(--text); }
+.stat-change { font-size: 11px; margin-top: 4px; display: flex; align-items: center; gap: 3px; }
+.stat-change.up { color: var(--success); }
+.stat-change.down { color: var(--danger); }
+.stat-icon {
+  position: absolute; top: 16px; right: 16px;
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+.si-blue { background: rgba(15,36,100,0.1); color: var(--admin); }
+.si-gold { background: rgba(255,198,66,0.15); color: var(--gold-dark); }
+.si-green { background: rgba(26,158,110,0.1); color: var(--success); }
+.si-red { background: rgba(216,68,68,0.1); color: var(--danger); }
+
+/* ─── GRIDS ─── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.card-head {
+  padding: 14px 18px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border); gap: 10px; flex-wrap: wrap;
+}
+.card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; }
+.card-body { padding: 14px 18px; }
+
+/* ─── BADGE ─── */
+.badge {
+  display: inline-block; padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+.badge-blue { background: rgba(15,36,100,0.1); color: var(--admin); }
+.badge-gold { background: rgba(255,198,66,0.2); color: var(--gold-dark); }
+.badge-green { background: rgba(26,158,110,0.1); color: var(--success); }
+.badge-red { background: rgba(216,68,68,0.1); color: var(--danger); }
+.badge-gray { background: var(--surface2); color: var(--text-muted); }
+
+/* ─── TABLE ─── */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+.data-table th {
+  padding: 10px 14px; background: var(--surface2);
+  font-weight: 500; color: var(--text-muted); text-align: left;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;
+}
+.data-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(15,36,100,0.02); }
+
+/* ─── FORMS ─── */
+.admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.form-group label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.form-group input, .form-group select, .form-group textarea {
+  padding: 9px 12px; border-radius: 9px; border: 1px solid var(--border);
+  background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+  color: var(--text); outline: none; transition: border var(--transition);
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--admin); }
+
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 28px; text-align: center; cursor: pointer; transition: all var(--transition);
+}
+.upload-zone:hover { border-color: var(--admin); background: rgba(15,36,100,0.03); }
+.upload-zone i { font-size: 26px; color: var(--text-muted); margin-bottom: 8px; display: block; }
+.upload-zone p { font-size: 13px; color: var(--text-muted); }
+
+.btn {
+  padding: 9px 20px; border-radius: 9px; border: none; font-weight: 600;
+  font-family: 'DM Sans', sans-serif; font-size: 13.5px; cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-primary { background: var(--admin); color: #fff; }
+.btn-primary:hover { background: var(--admin-mid); }
+.btn-gold { background: var(--gold); color: var(--admin); }
+.btn-gold:hover { background: var(--gold-dark); color: #fff; }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+.btn-outline:hover { background: var(--surface2); }
+
+/* ─── PERFORMANCE METRICS ─── */
+.perf-metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+.perf-card {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 16px 18px; text-align: center;
+}
+.perf-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin: 6px 0 4px; }
+.perf-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ─── GRAPHQL PANEL ─── */
+.gql-panel { display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px; margin-bottom: 20px; }
+.gql-editor {
+  background: #0f172a; border-radius: var(--radius);
+  padding: 18px; font-family: 'Courier New', monospace; font-size: 12.5px;
+  color: #94a3b8; min-height: 200px; line-height: 1.7;
+  border: 1px solid rgba(255,255,255,0.06); overflow-x: auto;
+}
+.gql-kw { color: #818cf8; }
+.gql-field { color: #38bdf8; }
+.gql-arg { color: #f472b6; }
+.gql-str { color: #86efac; }
+.gql-run-btn {
+  margin-top: 12px; padding: 8px 20px; background: var(--gold);
+  color: var(--admin); border: none; border-radius: 8px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer;
+  transition: all var(--transition);
+}
+.gql-run-btn:hover { background: var(--gold-dark); color: #fff; }
+.gql-result {
+  background: #0f172a; border-radius: var(--radius);
+  padding: 18px; font-family: 'Courier New', monospace; font-size: 12px;
+  color: #86efac; min-height: 200px; line-height: 1.7;
+  border: 1px solid rgba(255,255,255,0.06); overflow-x: auto;
+}
+
+/* ─── SEARCH BAR ─── */
+.search-bar {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 8px 14px; flex: 1;
+}
+.search-bar input {
+  border: none; outline: none; background: transparent;
+  font-family: 'DM Sans', sans-serif; font-size: 13.5px; flex: 1; color: var(--text); min-width: 0;
+}
+.search-bar i { color: var(--text-muted); flex-shrink: 0; }
+
+/* ─── CHART WRAPPERS ─── */
+.chart-wrap { position: relative; width: 100%; }
+.chart-legend {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 10px; font-size: 12px; color: var(--text-muted);
+}
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+
+/* ─── ALERTS ─── */
+.alert {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 10px; margin-bottom: 12px;
+  font-size: 13px; border: 1px solid;
+}
+.alert-warning { background: rgba(217,140,0,0.08); border-color: rgba(217,140,0,0.25); color: var(--warning); }
+.alert-danger { background: rgba(216,68,68,0.08); border-color: rgba(216,68,68,0.2); color: var(--danger); }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page.active { animation: fadeUp 0.3s ease; }
+
+/* ─── MOBILE BOTTOM NAV ─── */
+.mobile-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--mobile-nav-h);
+  background: var(--admin);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  z-index: 80;
+  justify-content: space-around; align-items: center;
+  padding: 0 4px;
+}
+.mob-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  flex: 1; cursor: pointer; padding: 6px 4px;
+  border: none; background: none; color: rgba(255,255,255,0.5);
+  transition: color var(--transition); font-family: 'DM Sans', sans-serif;
+}
+.mob-nav-item i { font-size: 17px; }
+.mob-nav-item span { font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
+.mob-nav-item.active { color: var(--gold); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-close-btn { display: block; }
+  .main { margin-left: 0; }
+  .menu-toggle { display: flex; }
+  .admin-badge { display: none; }
+  .content { padding: 16px 14px 80px; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
+  .two-col, .three-col, .gql-panel, .perf-metrics { grid-template-columns: 1fr; }
+  .mobile-nav { display: flex; }
+  .topbar { padding: 0 14px; }
+  .admin-form-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+  .stats-grid { gap: 8px; }
+  .stat-val { font-size: 20px; }
+  .stat-card { padding: 12px 14px; }
+  .stat-icon { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-mark">ES</div>
+    <div>
+      <div class="brand-name">EduSwati</div>
+      <div class="brand-tag">Admin Panel</div>
+    </div>
+    <button class="sidebar-close-btn" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">Overview</div>
+    <button class="nav-item active" onclick="showPage('overview', this)">
+      <i class="fas fa-th-large"></i> Dashboard
+    </button>
+    <button class="nav-item" onclick="showPage('students', this)">
+      <i class="fas fa-user-graduate"></i> Students
+      <span class="badge">46</span>
+    </button>
+    <button class="nav-item" onclick="showPage('subscriptions', this)">
+      <i class="fas fa-credit-card"></i> Subscriptions
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">Content</div>
+    <button class="nav-item" onclick="showPage('ebooks', this)">
+      <i class="fas fa-book"></i> Upload eBooks
+    </button>
+    <button class="nav-item" onclick="showPage('videos', this)">
+      <i class="fas fa-video"></i> Add Videos
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">System</div>
+    <button class="nav-item" onclick="showPage('performance', this)">
+      <i class="fas fa-tachometer-alt"></i> Performance
+    </button>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-chip">
+      <div class="avatar" style="font-size:11px">ADM</div>
+      <div>
+        <div class="uname">Admin User</div>
+        <div class="urole">Administrator</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <button class="menu-toggle" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+    <span class="admin-badge"><i class="fas fa-shield-alt"></i> Admin</span>
+    <div class="topbar-info">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-sub" id="page-sub">EduSwati Admin Panel</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="icon-btn" title="Notifications"><i class="fas fa-bell"></i></div>
+      <div class="icon-btn" title="Settings" onclick="showPage('performance', null)"><i class="fas fa-cog"></i></div>
+      <div class="avatar" style="cursor:pointer;width:34px;height:34px;font-size:11px">ADM</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══ OVERVIEW ═══ -->
+    <div class="page active" id="page-overview">
+
+      <!-- Alerts -->
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <span><strong>46 students</strong> have subscriptions expiring within 7 days. <a href="#" style="color:inherit;text-decoration:underline" onclick="showPage('students',null);return false">Review now →</a></span>
+      </div>
+      <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span><strong>3 students</strong> are overdue on payments. <a href="#" style="color:inherit;text-decoration:underline" onclick="showPage('students',null);return false">View accounts →</a></span>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Students</div><div class="stat-val">293</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> 18 this month</div><div class="stat-icon si-blue"><i class="fas fa-user-graduate"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Active Subscriptions</div><div class="stat-val">247</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> 84% rate</div><div class="stat-icon si-gold"><i class="fas fa-credit-card"></i></div></div>
+        <div class="stat-card"><div class="stat-label">MoMo Revenue (May)</div><div class="stat-val">E61,220</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> +12% vs Apr</div><div class="stat-icon si-green"><i class="fas fa-mobile-alt"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Pending Renewals</div><div class="stat-val">46</div><div class="stat-change down"><i class="fas fa-exclamation-triangle"></i> Action needed</div><div class="stat-icon si-red"><i class="fas fa-clock"></i></div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Monthly Revenue</span><span class="badge badge-green">May 2026</span></div>
+          <div class="card-body">
+            <div class="chart-legend">
+              <span><span class="legend-dot" style="background:#0f2464"></span>Revenue (E)</span>
+              <span><span class="legend-dot" style="background:#ffc642"></span>Students</span>
+            </div>
+            <div class="chart-wrap" style="height:200px"><canvas id="revenueChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Subscription Breakdown</span></div>
+          <div class="card-body" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <div class="chart-wrap" style="height:180px;flex:1;min-width:140px"><canvas id="planChart"></canvas></div>
+            <div style="font-size:12px;display:flex;flex-direction:column;gap:8px">
+              <div><span class="legend-dot" style="background:#0f2464"></span> Basic — 142</div>
+              <div><span class="legend-dot" style="background:#ffc642"></span> Standard — 89</div>
+              <div><span class="legend-dot" style="background:#1a9e6e"></span> Premium — 34</div>
+              <div><span class="legend-dot" style="background:#d84444"></span> Annual — 28</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Recent Student Registrations</span>
+          <button class="btn btn-primary btn-sm" onclick="showPage('students',null)">View All Students</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Grade</th><th>Plan</th><th>Payment</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Sipho Nkosi</strong></td><td>11</td><td>Premium</td><td>MTN MoMo</td><td><span class="badge badge-green">Active</span></td></tr>
+                <tr><td>Nomvula Dlamini</td><td>12</td><td>Standard</td><td>e-Mali</td><td><span class="badge badge-green">Active</span></td></tr>
+                <tr><td>Thandeka Mhlongo</td><td>10</td><td>Basic</td><td>MTN MoMo</td><td><span class="badge badge-gold">Expiring</span></td></tr>
+                <tr><td>Bongani Zwane</td><td>9</td><td>Basic</td><td>Bank Transfer</td><td><span class="badge badge-green">Active</span></td></tr>
+                <tr><td>Phiwayinkosi Maseko</td><td>11</td><td>Standard</td><td>e-Mali</td><td><span class="badge badge-red">Overdue</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STUDENTS ═══ -->
+    <div class="page" id="page-students">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Students</div><div class="stat-val">293</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> 18 this month</div><div class="stat-icon si-blue"><i class="fas fa-user-graduate"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Active Subscriptions</div><div class="stat-val">247</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> 84%</div><div class="stat-icon si-gold"><i class="fas fa-credit-card"></i></div></div>
+        <div class="stat-card"><div class="stat-label">MTN MoMo Revenue</div><div class="stat-val">E61,220</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> This month</div><div class="stat-icon si-green"><i class="fas fa-mobile-alt"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Pending Renewals</div><div class="stat-val">46</div><div class="stat-change down"><i class="fas fa-exclamation-triangle"></i> Action needed</div><div class="stat-icon si-red"><i class="fas fa-clock"></i></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">All Students</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div class="search-bar" style="flex:1;min-width:160px">
+              <i class="fas fa-search"></i>
+              <input type="text" placeholder="Search students…" id="student-search" oninput="filterStudents()">
+            </div>
+            <button class="btn btn-primary btn-sm">Export CSV</button>
+          </div>
+        </div>
+        <div style="padding:10px 18px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-outline" id="filter-all" onclick="setStudentFilter('all',this)" style="border-color:var(--admin);color:var(--admin)">All (293)</button>
+          <button class="btn btn-sm btn-outline" id="filter-active" onclick="setStudentFilter('active',this)">Active</button>
+          <button class="btn btn-sm btn-outline" id="filter-expiring" onclick="setStudentFilter('expiring',this)">Expiring</button>
+          <button class="btn btn-sm btn-outline" id="filter-overdue" onclick="setStudentFilter('overdue',this)">Overdue</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrap">
+            <table class="data-table" id="students-table">
+              <thead><tr><th>Name</th><th>Grade</th><th>Plan</th><th>Payment</th><th>Expires</th><th>Progress</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="students-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SUBSCRIPTIONS ═══ -->
+    <div class="page" id="page-subscriptions">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-val">E61,220</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> This month</div><div class="stat-icon si-green"><i class="fas fa-coins"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Active Plans</div><div class="stat-val">293</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> 4 plan types</div><div class="stat-icon si-blue"><i class="fas fa-layer-group"></i></div></div>
+        <div class="stat-card"><div class="stat-label">MTN MoMo</div><div class="stat-val">68%</div><div class="stat-change up"><i class="fas fa-mobile-alt"></i> Top method</div><div class="stat-icon si-gold"><i class="fas fa-mobile-alt"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Churn Rate</div><div class="stat-val">5.2%</div><div class="stat-change down"><i class="fas fa-arrow-down"></i> -1.1% vs Apr</div><div class="stat-icon si-red"><i class="fas fa-user-times"></i></div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <span class="card-title">💳 Subscription Plans</span>
+          <button class="btn btn-primary btn-sm" onclick="alert('New plan form would open here')">+ New Plan</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Plan</th><th>Price (SZL)</th><th>Duration</th><th>Active Users</th><th>Revenue</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Basic</strong></td><td>E80/mo</td><td>Monthly</td><td>142</td><td>E11,360</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-sm btn-outline" onclick="alert('Edit plan')">Edit</button></td></tr>
+                <tr><td><strong>Standard</strong></td><td>E200/mo</td><td>Monthly</td><td>89</td><td>E17,800</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-sm btn-outline" onclick="alert('Edit plan')">Edit</button></td></tr>
+                <tr><td><strong>Premium</strong></td><td>E350/mo</td><td>Monthly</td><td>34</td><td>E11,900</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-sm btn-outline" onclick="alert('Edit plan')">Edit</button></td></tr>
+                <tr><td><strong>Annual Basic</strong></td><td>E720/yr</td><td>Yearly</td><td>28</td><td>E20,160</td><td><span class="badge badge-blue">Active</span></td><td><button class="btn btn-sm btn-outline" onclick="alert('Edit plan')">Edit</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Revenue by Method</span></div>
+          <div class="card-body">
+            <div class="chart-wrap" style="height:200px"><canvas id="paymentChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Recent Payments</span></div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table class="data-table" style="min-width:300px">
+                <thead><tr><th>Student</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>Sipho Nkosi</td><td>E350</td><td>MoMo</td><td><span class="badge badge-green">Paid</span></td></tr>
+                  <tr><td>Nomvula Dlamini</td><td>E200</td><td>e-Mali</td><td><span class="badge badge-green">Paid</span></td></tr>
+                  <tr><td>Thandeka Mhlongo</td><td>E80</td><td>MoMo</td><td><span class="badge badge-gold">Pending</span></td></tr>
+                  <tr><td>Phiwayinkosi Maseko</td><td>E200</td><td>e-Mali</td><td><span class="badge badge-red">Failed</span></td></tr>
+                  <tr><td>Lungelo Shabalala</td><td>E720</td><td>MoMo</td><td><span class="badge badge-green">Paid</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ EBOOKS ═══ -->
+    <div class="page" id="page-ebooks">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><span class="card-title">📤 Upload eBook</span></div>
+          <div class="card-body">
+            <div class="upload-zone" onclick="alert('File picker would open here')">
+              <i class="fas fa-file-pdf"></i>
+              <p>Drag & drop PDF here<br><span style="font-size:11px">or click to browse</span></p>
+            </div>
+            <div class="form-group" style="margin-top:14px">
+              <label>eBook Title</label>
+              <input type="text" placeholder="e.g. Mathematics Grade 11 Textbook">
+            </div>
+            <div class="admin-form-grid">
+              <div class="form-group">
+                <label>Subject</label>
+                <select><option>Mathematics</option><option>Physical Science</option><option>Biology</option><option>English</option><option>History</option><option>Geography</option></select>
+              </div>
+              <div class="form-group">
+                <label>Grade</label>
+                <select><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option></select>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="alert('eBook uploaded successfully!')">Upload eBook</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-title">📚 Library Contents</span><span class="badge badge-blue">12 books</span></div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table class="data-table" style="min-width:320px">
+                <thead><tr><th>Title</th><th>Subject</th><th>Grade</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td>Mathematics Grade 11</td><td>Maths</td><td>Gr 11</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                  <tr><td>Physical Science</td><td>Science</td><td>Gr 11</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                  <tr><td>Biology Essentials</td><td>Biology</td><td>Gr 11</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                  <tr><td>English Language & Lit.</td><td>English</td><td>Gr 11</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                  <tr><td>History of Africa</td><td>History</td><td>Gr 11</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                  <tr><td>Physical Geography</td><td>Geography</td><td>Gr 11</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ VIDEOS ═══ -->
+    <div class="page" id="page-videos">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><span class="card-title">🎬 Add Video Lesson</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Video Title</label>
+              <input type="text" placeholder="e.g. Introduction to Trigonometry">
+            </div>
+            <div class="form-group">
+              <label>Video URL (YouTube Unlisted / Bunny.net)</label>
+              <input type="url" placeholder="https://youtube.com/embed/...">
+            </div>
+            <div class="admin-form-grid">
+              <div class="form-group">
+                <label>Subject</label>
+                <select><option>Mathematics</option><option>Physical Science</option><option>Biology</option><option>English</option><option>History</option><option>Geography</option></select>
+              </div>
+              <div class="form-group">
+                <label>Grade</label>
+                <select><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option></select>
+              </div>
+            </div>
+            <div class="admin-form-grid">
+              <div class="form-group">
+                <label>Duration (mins)</label>
+                <input type="number" placeholder="25">
+              </div>
+              <div class="form-group">
+                <label>Thumbnail URL</label>
+                <input type="url" placeholder="https://...">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea rows="3" placeholder="Brief description of the lesson…" style="resize:vertical"></textarea>
+            </div>
+            <button class="btn btn-gold" onclick="alert('Video lesson added!')">Add Video Lesson</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-title">🎥 Video Library</span><span class="badge badge-blue">24 videos</span></div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table class="data-table" style="min-width:300px">
+                <thead><tr><th>Title</th><th>Subject</th><th>Duration</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td>Quadratic Formula</td><td>Maths</td><td>18:34</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                  <tr><td>Newton's Laws</td><td>Science</td><td>22:10</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                  <tr><td>Cell Division</td><td>Biology</td><td>25:45</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                  <tr><td>Essay Structure</td><td>English</td><td>30:00</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                  <tr><td>Colonialism in Africa</td><td>History</td><td>28:15</td><td><button class="btn btn-sm btn-danger" onclick="alert('Delete?')"><i class="fas fa-trash"></i></button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PERFORMANCE ═══ -->
+    <div class="page" id="page-performance">
+      <div class="perf-metrics">
+        <div class="perf-card"><div class="perf-lbl">API Response Time</div><div class="perf-val" style="color:var(--success)">142ms</div><div style="font-size:11px;color:var(--text-muted)">↓ 12ms vs yesterday</div></div>
+        <div class="perf-card"><div class="perf-lbl">Active Sessions</div><div class="perf-val">247</div><div style="font-size:11px;color:var(--text-muted)">Peak: 312 at 14:00</div></div>
+        <div class="perf-card"><div class="perf-lbl">DB Query Avg</div><div class="perf-val" style="color:var(--warning)">38ms</div><div style="font-size:11px;color:var(--text-muted)">Supabase PostgreSQL</div></div>
+        <div class="perf-card"><div class="perf-lbl">Storage Used</div><div class="perf-val">4.2 GB</div><div style="font-size:11px;color:var(--text-muted)">of 8GB (Free tier)</div></div>
+        <div class="perf-card"><div class="perf-lbl">Uptime</div><div class="perf-val" style="color:var(--success)">99.8%</div><div style="font-size:11px;color:var(--text-muted)">Last 30 days</div></div>
+        <div class="perf-card"><div class="perf-lbl">GraphQL Queries</div><div class="perf-val">18,432</div><div style="font-size:11px;color:var(--text-muted)">Today</div></div>
+      </div>
+
+      <div class="two-col" style="margin-bottom:20px">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Server Response Time (24h)</span></div>
+          <div class="card-body">
+            <div class="chart-wrap" style="height:180px"><canvas id="perfChart"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Request Distribution</span></div>
+          <div class="card-body" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <div class="chart-wrap" style="height:180px;flex:1;min-width:120px"><canvas id="reqChart"></canvas></div>
+            <div style="font-size:12px;display:flex;flex-direction:column;gap:8px">
+              <div><span class="legend-dot" style="background:#0f2464"></span> GraphQL — 52%</div>
+              <div><span class="legend-dot" style="background:#ffc642"></span> REST — 24%</div>
+              <div><span class="legend-dot" style="background:#1a9e6e"></span> Storage — 15%</div>
+              <div><span class="legend-dot" style="background:#d84444"></span> Auth — 9%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GraphQL Explorer -->
+      <div class="gql-panel">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+            <span style="background:var(--admin);color:#fff;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700">GraphQL</span>
+            Performance Explorer
+          </div>
+          <div class="gql-editor">
+<span class="gql-kw">query</span> <span class="gql-field">GetStudentPerformance</span>(<br>
+&nbsp;&nbsp;<span class="gql-arg">$userId</span>: UUID!,<br>
+&nbsp;&nbsp;<span class="gql-arg">$limit</span>: Int = 10<br>
+) {<br>
+&nbsp;&nbsp;<span class="gql-field">progress</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gql-kw">where</span>: {<span class="gql-field">user_id</span>: {<span class="gql-kw">_eq</span>: <span class="gql-arg">$userId</span>}},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gql-kw">order_by</span>: {<span class="gql-field">updated_at</span>: <span class="gql-kw">desc</span>},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gql-kw">limit</span>: <span class="gql-arg">$limit</span><br>
+&nbsp;&nbsp;) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gql-field">id score completed updated_at</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gql-field">course</span> { <span class="gql-field">title subject_id</span> }<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="gql-field">users_by_pk</span>(<span class="gql-field">id</span>: <span class="gql-arg">$userId</span>) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="gql-field">full_name grade email</span><br>
+&nbsp;&nbsp;}<br>
+}
+          </div>
+          <button class="gql-run-btn" onclick="runQuery()">▶ Run Query</button>
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:600;margin-bottom:10px">Response</div>
+          <div class="gql-result" id="gql-result">
+            <span style="color:#94a3b8">// Click "Run Query" to see results</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav">
+  <button class="mob-nav-item active" onclick="showPage('overview', null); setMobActive(this)">
+    <i class="fas fa-th-large"></i><span>Overview</span>
+  </button>
+  <button class="mob-nav-item" onclick="showPage('students', null); setMobActive(this)">
+    <i class="fas fa-users"></i><span>Students</span>
+  </button>
+  <button class="mob-nav-item" onclick="showPage('subscriptions', null); setMobActive(this)">
+    <i class="fas fa-credit-card"></i><span>Plans</span>
+  </button>
+  <button class="mob-nav-item" onclick="showPage('ebooks', null); setMobActive(this)">
+    <i class="fas fa-book"></i><span>eBooks</span>
+  </button>
+  <button class="mob-nav-item" onclick="showPage('performance', null); setMobActive(this)">
+    <i class="fas fa-tachometer-alt"></i><span>System</span>
+  </button>
+</nav>
+
+<script>
+// ─── SIDEBAR ───
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ─── NAVIGATION ───
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (btn) { btn.classList.add('active'); closeSidebar(); }
+
+  const titles = {
+    overview: ['Dashboard', 'EduSwati Admin Overview'],
+    students: ['Students', 'Manage enrolled students'],
+    subscriptions: ['Subscriptions', 'Plans and payment management'],
+    ebooks: ['eBook Library', 'Upload and manage eBooks'],
+    videos: ['Video Lessons', 'Manage video content'],
+    performance: ['Performance & GraphQL', 'System metrics and query explorer'],
+  };
+  if (titles[id]) {
+    document.getElementById('page-title').textContent = titles[id][0];
+    document.getElementById('page-sub').textContent = titles[id][1];
+  }
+
+  if (id === 'performance') initPerfCharts();
+  if (id === 'students') renderStudents();
+}
+
+function setMobActive(el) {
+  document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ─── STUDENTS DATA ───
+const allStudents = [
+  { name: 'Sipho Nkosi', grade: 11, plan: 'Premium', payment: 'MTN MoMo', expires: 'Jun 23', progress: '73%', status: 'active' },
+  { name: 'Nomvula Dlamini', grade: 12, plan: 'Standard', payment: 'e-Mali', expires: 'Jun 15', progress: '91%', status: 'active' },
+  { name: 'Thandeka Mhlongo', grade: 10, plan: 'Basic', payment: 'MTN MoMo', expires: 'May 28', progress: '44%', status: 'expiring' },
+  { name: 'Bongani Zwane', grade: 9, plan: 'Basic', payment: 'Bank Transfer', expires: 'Jul 1', progress: '28%', status: 'active' },
+  { name: 'Lungelo Shabalala', grade: 12, plan: 'Annual Basic', payment: 'MTN MoMo', expires: 'Dec 31', progress: '87%', status: 'active' },
+  { name: 'Phiwayinkosi Maseko', grade: 11, plan: 'Standard', payment: 'e-Mali', expires: 'May 25', progress: '62%', status: 'overdue' },
+];
+let studentFilter = 'all', studentSearch = '';
+
+function statusBadge(status) {
+  const map = { active: 'badge-green', expiring: 'badge-gold', overdue: 'badge-red' };
+  const label = { active: 'Active', expiring: 'Expiring', overdue: 'Overdue' };
+  return `<span class="badge ${map[status]}">${label[status]}</span>`;
+}
+
+function renderStudents() {
+  const tbody = document.getElementById('students-tbody');
+  const filtered = allStudents.filter(s => {
+    const matchFilter = studentFilter === 'all' || s.status === studentFilter;
+    const matchSearch = s.name.toLowerCase().includes(studentSearch) || s.plan.toLowerCase().includes(studentSearch);
+    return matchFilter && matchSearch;
+  });
+  tbody.innerHTML = filtered.map(s => `
+    <tr>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.grade}</td>
+      <td>${s.plan}</td>
+      <td>${s.payment}</td>
+      <td>${s.expires}</td>
+      <td>${s.progress}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td><button class="btn btn-sm btn-outline" onclick="alert('Manage ${s.name}')">Manage</button></td>
+    </tr>
+  `).join('');
+}
+
+function filterStudents() {
+  studentSearch = document.getElementById('student-search').value.toLowerCase();
+  renderStudents();
+}
+
+function setStudentFilter(filter, btn) {
+  studentFilter = filter;
+  document.querySelectorAll('[id^="filter-"]').forEach(b => b.style.borderColor = '');
+  document.querySelectorAll('[id^="filter-"]').forEach(b => b.style.color = '');
+  btn.style.borderColor = 'var(--admin)';
+  btn.style.color = 'var(--admin)';
+  renderStudents();
+}
+
+renderStudents();
+
+// ─── GRAPHQL ───
+function runQuery() {
+  const result = document.getElementById('gql-result');
+  result.innerHTML = '<span style="color:#94a3b8">// Loading…</span>';
+  setTimeout(() => {
+    result.innerHTML = `{
+  <span style="color:#f472b6">"data"</span>: {
+    <span style="color:#38bdf8">"progress"</span>: [
+      {
+        <span style="color:#38bdf8">"id"</span>: <span style="color:#86efac">"a3f8-..."</span>,
+        <span style="color:#38bdf8">"score"</span>: <span style="color:#fbbf24">88</span>,
+        <span style="color:#38bdf8">"completed"</span>: <span style="color:#fbbf24">true</span>,
+        <span style="color:#38bdf8">"updated_at"</span>: <span style="color:#86efac">"2026-05-23"</span>,
+        <span style="color:#38bdf8">"course"</span>: { <span style="color:#38bdf8">"title"</span>: <span style="color:#86efac">"Quadratic Equations"</span> }
+      }
+    ],
+    <span style="color:#38bdf8">"users_by_pk"</span>: {
+      <span style="color:#38bdf8">"full_name"</span>: <span style="color:#86efac">"Sipho Nkosi"</span>,
+      <span style="color:#38bdf8">"grade"</span>: <span style="color:#fbbf24">11</span>,
+      <span style="color:#38bdf8">"email"</span>: <span style="color:#86efac">"sipho@eduswati.com"</span>
+    }
+  }
+}`;
+  }, 700);
+}
+
+// ─── CHARTS ───
+let perfChartsInited = false;
+
+window.addEventListener('load', () => {
+  // Revenue chart
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Dec','Jan','Feb','Mar','Apr','May'],
+      datasets: [
+        { label: 'Revenue (E)', data: [38000, 42000, 45000, 51000, 55000, 61220], backgroundColor: '#0f2464', borderRadius: 6 },
+        { label: 'Students', data: [220, 235, 248, 260, 275, 293], backgroundColor: '#ffc642', borderRadius: 6 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true } }
+    }
+  });
+
+  // Plan distribution
+  new Chart(document.getElementById('planChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Basic','Standard','Premium','Annual'],
+      datasets: [{ data: [142, 89, 34, 28], backgroundColor: ['#0f2464','#ffc642','#1a9e6e','#d84444'], borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      cutout: '65%'
+    }
+  });
+
+  // Payment method
+  new Chart(document.getElementById('paymentChart'), {
+    type: 'bar',
+    data: {
+      labels: ['MTN MoMo','e-Mali','Bank Transfer','Other'],
+      datasets: [{ label: 'Students', data: [199, 58, 24, 12], backgroundColor: ['#0f2464','#ffc642','#1a9e6e','#94a3b8'], borderRadius: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true } }
+    }
+  });
+});
+
+function initPerfCharts() {
+  if (perfChartsInited) return;
+  perfChartsInited = true;
+
+  const hours = Array.from({length:24},(_,i)=> i + ':00');
+  const resp = [180,165,142,138,155,170,210,240,195,162,148,145,138,152,160,158,142,138,145,152,160,168,175,180];
+
+  new Chart(document.getElementById('perfChart'), {
+    type: 'line',
+    data: {
+      labels: hours,
+      datasets: [{ label: 'Response (ms)', data: resp, borderColor: '#1a9e6e', backgroundColor: 'rgba(26,158,110,0.07)', fill: true, tension: 0.4, pointRadius: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }, y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true } }
+    }
+  });
+
+  new Chart(document.getElementById('reqChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['GraphQL','REST','Storage','Auth'],
+      datasets: [{ data: [52, 24, 15, 9], backgroundColor: ['#0f2464','#ffc642','#1a9e6e','#d84444'], borderWidth: 0, hoverOffset: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      cutout: '68%'
+    }
+  });
+}
+</script>
+</body>
+</html>
