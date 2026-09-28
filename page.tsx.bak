@@ -1,0 +1,10 @@
+// app/page.tsx
+// Root "/" — serve the elearning landing page as a static file,
+// or redirect straight to login if you prefer.
+import { redirect } from 'next/navigation'
+
+export default function RootPage() {
+  // Redirect visitors to the marketing landing page (served as a static file
+  // in /public/elearning.html) or straight to login.
+  redirect('/login')
+}
