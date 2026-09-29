@@ -1,4 +1,18 @@
-/* app/globals.css */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body { font-family: 'DM Sans', 'Inter', sans-serif; background: #f2f4f9; }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'DM Sans', 'Inter', sans-serif;
+  background: #f2f4f9;
+}
