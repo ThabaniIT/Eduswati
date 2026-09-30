@@ -84,7 +84,7 @@ export default function SignupPage() {
             },
 
             emailRedirectTo:
-              `${window.location.origin}/auth/callback`,
+  `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
           },
         })
 
