@@ -83,7 +83,7 @@ export default function SignupPage() {
               grade: parseInt(form.grade, 10),
             },
 
-            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+            
           },
         })
 
