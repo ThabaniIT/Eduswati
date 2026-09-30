@@ -14,33 +14,25 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
 
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+  e.preventDefault()
+  setLoading(true)
+  setError('')
 
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+  const { error: authError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
 
-    if (authError) {
-      setError(authError.message)
-      setLoading(false)
-      return
-    }
+  if (authError) {
+    setError(authError.message)
+    setLoading(false)
+    return
+  }
 
-    // Fetch role to redirect correctly
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setError('Login failed'); setLoading(false); return }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profile?.role === 'admin') {
-      router.push('/admin')
-    } else {
-      router.push('/dashboard')
-    }
+  // Login succeeded — go directly to the student dashboard
+  router.push('/dashboard')
+  router.refresh()
+}
   }
 
   return (
