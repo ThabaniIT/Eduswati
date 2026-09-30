@@ -23,11 +23,23 @@ export default function LandingPage() {
   const [modal, setModal] = useState<Modal>('none')
   const [dark, setDark] = useState(false)
   const [mobileMenu, setMobileMenu] = useState(false)
+  const router = useRouter()
 
   const nav = (v: View) => { setView(v); setMobileMenu(false) }
-  const openLogin = () => { setMobileMenu(false) router.push('/login')}
-  const openSignup = () => { setMobileMenu(false) router.push('/signup')}
-  const openForgot = () => { setModal('none') router.push('/forgot-password')}
+  const openLogin = () => {
+  setMobileMenu(false)
+  router.push('/login')
+}
+
+const openSignup = () => {
+  setMobileMenu(false)
+  router.push('/signup')
+}
+
+const openForgot = () => {
+  setModal('none')
+  router.push('/forgot-password')
+}
   const closeModal  = () => setModal('none')
 
   // Close modal on Escape key
