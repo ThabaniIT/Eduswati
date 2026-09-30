@@ -1,102 +1,33 @@
-// app/dashboard/page.tsx
-
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import StudentDashboard from '@/components/StudentDashboard'
-
-export default async function DashboardPage() {
-  const supabase = await createClient()
-
-  // Verify the logged-in user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-
-  if (userError || !user) {
-    redirect('/login')
-  }
-
-  // Get the student's profile
-  const {
-    data: profile,
-    error: profileError,
-  } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  if (profileError || !profile) {
-    return (
+export default function DashboardPage() {
+  return (
+    <main
+      style={{
+        minHeight: '100vh',
+        padding: '40px',
+        fontFamily: 'Arial, sans-serif',
+        background: '#f2f4f9',
+      }}
+    >
       <div
         style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '24px',
-          fontFamily: 'Arial, sans-serif',
+          maxWidth: '700px',
+          margin: '0 auto',
+          padding: '32px',
+          background: '#ffffff',
+          borderRadius: '16px',
         }}
       >
-        <div
-          style={{
-            maxWidth: '600px',
-            width: '100%',
-            padding: '32px',
-            borderRadius: '12px',
-            background: '#fff',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          }}
-        >
-          <h1>Profile not found</h1>
-          <p>
-            Your account is authenticated, but your EduSwati student
-            profile could not be found.
-          </p>
-          <p>
-            Please contact the administrator if this continues.
-          </p>
-        </div>
+        <h1>EduSwati Dashboard Test</h1>
+
+        <p>
+          This is a temporary test page.
+        </p>
+
+        <p>
+          If this page loads without React hydration errors,
+          the problem is inside the original dashboard components.
+        </p>
       </div>
-    )
-  }
-
-  // Students use the student dashboard.
-  // Admins should use the admin area.
-  if (profile.role === 'admin') {
-    redirect('/admin')
-  }
-
-  // Get the student's latest active subscription.
-  //
-  // The subscriptions table uses user_id according to the
-  // database/RLS structure.
-  const {
-    data: subscription,
-    error: subscriptionError,
-  } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .eq('user_id', user.id)
-    .in('status', ['active', 'expiring'])
-    .order('expires_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  // Don't prevent the dashboard from loading if the student
-  // simply doesn't have a subscription yet.
-  if (subscriptionError) {
-    console.error(
-      'Subscription query error:',
-      subscriptionError
-    )
-  }
-
-  return (
-    <StudentDashboard
-      profile={profile}
-      subscription={subscription ?? null}
-    />
+    </main>
   )
 }
