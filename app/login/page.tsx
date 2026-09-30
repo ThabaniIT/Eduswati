@@ -32,7 +32,7 @@ export default function LoginPage() {
   // Login succeeded — go directly to the student dashboard
   router.push('/dashboard')
   router.refresh()
-}
+    
   }
 
   return (
