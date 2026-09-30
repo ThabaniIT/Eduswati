@@ -25,8 +25,8 @@ export default function LandingPage() {
   const [mobileMenu, setMobileMenu] = useState(false)
 
   const nav = (v: View) => { setView(v); setMobileMenu(false) }
-  const openLogin   = () => { setModal('login');   setMobileMenu(false) }
-  const openSignup  = () => { setModal('signup');  setMobileMenu(false) }
+  const openLogin = () => { setMobileMenu(false) router.push('/login')}
+  const openSignup = () => { setMobileMenu(false) router.push('/signup')}
   const openForgot  = () => setModal('forgot')
   const closeModal  = () => setModal('none')
 
