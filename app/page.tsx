@@ -4,6 +4,7 @@
 // Auth modals use the same Supabase client-side logic as /login, /signup, /forgot-password.
 'use client'
 
+import Link from "next/link";
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Script from 'next/script'
@@ -22,11 +23,23 @@ export default function LandingPage() {
   const [modal, setModal] = useState<Modal>('none')
   const [dark, setDark] = useState(false)
   const [mobileMenu, setMobileMenu] = useState(false)
+  const router = useRouter()
 
   const nav = (v: View) => { setView(v); setMobileMenu(false) }
-  const openLogin   = () => { setModal('login');   setMobileMenu(false) }
-  const openSignup  = () => { setModal('signup');  setMobileMenu(false) }
-  const openForgot  = () => setModal('forgot')
+  const openLogin = () => {
+  setMobileMenu(false)
+  router.push('/login')
+}
+
+const openSignup = () => {
+  setMobileMenu(false)
+  router.push('/signup')
+}
+
+const openForgot = () => {
+  setModal('none')
+  router.push('/forgot-password')
+}
   const closeModal  = () => setModal('none')
 
   // Close modal on Escape key
