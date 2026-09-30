@@ -4,6 +4,7 @@
 // Auth modals use the same Supabase client-side logic as /login, /signup, /forgot-password.
 'use client'
 
+import Link from "next/link";
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Script from 'next/script'
