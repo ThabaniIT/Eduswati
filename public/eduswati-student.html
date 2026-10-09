@@ -2864,8 +2864,31 @@ function clearChat() {
 }
 
 // ─── CHARTS ───────────────────────────────────────────────────────────────────
+
+function safelyCreateChart(canvasId, config) {
+  const canvas = document.getElementById(canvasId);
+
+  if (!canvas || typeof Chart === 'undefined') {
+    console.warn(
+      `[EduSwati] Chart skipped: ${canvasId} canvas or Chart.js is unavailable.`
+    );
+    return null;
+  }
+
+  const existingChart = Chart.getChart(canvas);
+  if (existingChart) {
+    existingChart.destroy();
+  }
+
+  try {
+    return new Chart(canvas, config);
+  } catch (error) {
+    console.error(`[EduSwati] Failed to initialize ${canvasId}:`, error);
+    return null;
+  }
+}
 window.addEventListener('load', () => {
-  new Chart(document.getElementById('weeklyChart'), {
+  safelyCreateChart('weeklyChart', {
     type: 'bar',
     data: {
       labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
@@ -2881,7 +2904,7 @@ window.addEventListener('load', () => {
     }
   });
 
-  new Chart(document.getElementById('trendChart'), {
+  safelyCreateChart('trendChart', {
     type: 'line',
     data: {
       labels: ['Dec','Jan','Feb','Mar','Apr','May'],
@@ -2897,7 +2920,7 @@ window.addEventListener('load', () => {
     }
   });
 
-  new Chart(document.getElementById('subjectChart'), {
+  safelyCreateChart('subjectChart', {
     type: 'radar',
     data: {
       labels: ['Maths','English','Science','Biology','History','Geography'],
