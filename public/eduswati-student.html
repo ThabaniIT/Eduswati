@@ -1361,41 +1361,14 @@ body {
     <div class="page" id="page-videos">
       <div class="search-bar">
         <i class="fas fa-search"></i>
-        <input type="text" placeholder="Search video lessons…">
-        <span class="badge badge-gray">24 videos</span>
+        <input type="search" id="video-search" placeholder="Search video lessons…" oninput="filterVideos()" aria-label="Search video lessons">
+        <span class="badge badge-gray" id="video-count">Loading…</span>
       </div>
-      <div class="filter-row">
-        <div class="filter-chip active">All</div>
-        <div class="filter-chip">Maths</div>
-        <div class="filter-chip">Science</div>
-        <div class="filter-chip">English</div>
-        <div class="filter-chip">History</div>
+      <div class="filter-row" id="video-subject-filters">
+        <div class="filter-chip active" onclick="filterVideosBySubject('All', this)">All</div>
       </div>
-      <div class="three-col">
-        <div class="card" style="cursor:pointer">
-          <div style="background:linear-gradient(135deg,#1a3a8f,#2548b5);height:110px;display:flex;align-items:center;justify-content:center;color:white;font-size:34px;">📐</div>
-          <div class="card-body"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px">Mathematics</div><div style="font-weight:600;font-size:13px;margin-bottom:6px">Quadratic Formula Explained</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;color:var(--text-muted)"><i class="fas fa-clock"></i> 18:34</span><span class="badge badge-green">Completed</span></div></div>
-        </div>
-        <div class="card" style="cursor:pointer">
-          <div style="background:linear-gradient(135deg,#0f6e56,#1d9e75);height:110px;display:flex;align-items:center;justify-content:center;color:white;font-size:34px;">🔬</div>
-          <div class="card-body"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px">Physical Science</div><div style="font-weight:600;font-size:13px;margin-bottom:6px">Newton's 3 Laws of Motion</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;color:var(--text-muted)"><i class="fas fa-clock"></i> 22:10</span><span class="badge badge-green">Completed</span></div></div>
-        </div>
-        <div class="card" style="cursor:pointer">
-          <div style="background:linear-gradient(135deg,#d84444,#a32d2d);height:110px;display:flex;align-items:center;justify-content:center;color:white;font-size:34px;">🧬</div>
-          <div class="card-body"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px">Biology</div><div style="font-weight:600;font-size:13px;margin-bottom:6px">Cell Division: Mitosis &amp; Meiosis</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;color:var(--text-muted)"><i class="fas fa-clock"></i> 25:45</span><span class="badge badge-red">In Progress</span></div></div>
-        </div>
-        <div class="card" style="cursor:pointer">
-          <div style="background:linear-gradient(135deg,#d98c00,#ffc642);height:110px;display:flex;align-items:center;justify-content:center;color:white;font-size:34px;">✍️</div>
-          <div class="card-body"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px">English</div><div style="font-weight:600;font-size:13px;margin-bottom:6px">Essay Structure Masterclass</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;color:var(--text-muted)"><i class="fas fa-clock"></i> 30:00</span><span class="badge badge-gray">Not Started</span></div></div>
-        </div>
-        <div class="card" style="cursor:pointer">
-          <div style="background:linear-gradient(135deg,#533489,#7f77dd);height:110px;display:flex;align-items:center;justify-content:center;color:white;font-size:34px;">🌍</div>
-          <div class="card-body"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px">History</div><div style="font-weight:600;font-size:13px;margin-bottom:6px">Colonialism in Africa</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;color:var(--text-muted)"><i class="fas fa-clock"></i> 28:15</span><span class="badge badge-green">Completed</span></div></div>
-        </div>
-        <div class="card" style="cursor:pointer">
-          <div style="background:linear-gradient(135deg,#1d9e75,#3b6d11);height:110px;display:flex;align-items:center;justify-content:center;color:white;font-size:34px;">🗺️</div>
-          <div class="card-body"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px">Geography</div><div style="font-weight:600;font-size:13px;margin-bottom:6px">Climate &amp; Weather Patterns</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;color:var(--text-muted)"><i class="fas fa-clock"></i> 19:50</span><span class="badge badge-gray">Not Started</span></div></div>
-        </div>
+      <div class="three-col" id="video-grid" aria-live="polite">
+        <div class="card"><div class="card-body" style="padding:24px;text-align:center;color:var(--text-muted)"><i class="fas fa-spinner fa-spin"></i> Loading video lessons…</div></div>
       </div>
     </div>
 
@@ -2512,6 +2485,7 @@ function showPage(id, btn) {
   if (id === 'planner' && !STUDY.plannerLoaded) loadPlanner();
   if (id === 'alarms' && !STUDY.alarmsLoaded) loadAlarms();
   if (id === 'progress') loadMyStatistics();
+  if (id === 'videos' && !VIDEO_STATE.loaded) loadVideos();
 }
 
 function setMobActive(el) {
@@ -2635,6 +2609,126 @@ function openBook(bookOrTitle) {
 }
 
 loadBooks();
+
+// ─── VIDEO LESSONS (live Supabase data via authenticated API) ─────────────────
+const VIDEO_STATE = { items: [], loaded: false, loading: false, subject: 'All', search: '' };
+const VIDEO_SUBJECT_ICONS = {
+  Mathematics: '📐', Maths: '📐', 'Physical Science': '🔬', Physics: '⚛️', Chemistry: '⚗️',
+  Biology: '🧬', English: '✍️', History: '🌍', Geography: '🗺️', ICT: '💻', Siswati: '📖',
+  Accounting: '🧮', Economics: '📊', Agriculture: '🌱', 'Business Studies': '💼'
+};
+function videoEscape(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function loadVideos(force = false) {
+  if (VIDEO_STATE.loading || (VIDEO_STATE.loaded && !force)) return;
+  VIDEO_STATE.loading = true;
+  const grid = document.getElementById('video-grid');
+  const count = document.getElementById('video-count');
+  if (grid) grid.innerHTML = '<div class="card"><div class="card-body" style="padding:24px;text-align:center;color:var(--text-muted)"><i class="fas fa-spinner fa-spin"></i> Loading video lessons…</div></div>';
+  apiGet('/api/student/videos').then(data => {
+    VIDEO_STATE.items = Array.isArray(data.videos) ? data.videos : [];
+    VIDEO_STATE.loaded = true;
+    VIDEO_STATE.subject = 'All';
+    renderVideoFilters();
+    renderVideos();
+  }).catch(err => {
+    if (grid) grid.innerHTML = '<div class="card"><div class="card-body" style="padding:24px;text-align:center"><i class="fas fa-triangle-exclamation" style="font-size:24px;color:var(--warning,#d98c00)"></i><p style="margin:12px 0;color:var(--text-muted)">Video lessons could not be loaded. Check your connection and try again.</p><button class="btn-primary" onclick="loadVideos(true)">Try again</button></div></div>';
+    if (count) count.textContent = 'Unavailable';
+    console.error('Video library load failed:', err);
+  }).finally(() => { VIDEO_STATE.loading = false; });
+}
+function renderVideoFilters() {
+  const el = document.getElementById('video-subject-filters');
+  if (!el) return;
+  const subjects = [...new Set(VIDEO_STATE.items.map(v => v.subject).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+  const chips = [{ label: 'All', value: 'All' }, ...subjects.map(s => ({ label: s, value: s }))];
+  if (!subjects.includes(VIDEO_STATE.subject)) VIDEO_STATE.subject = 'All';
+  el.innerHTML = chips.map(c => `<div class="filter-chip ${VIDEO_STATE.subject === c.value ? 'active' : ''}" role="button" tabindex="0" data-subject="${videoEscape(c.value)}" onclick="filterVideosBySubject(this.dataset.subject, this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filterVideosBySubject(this.dataset.subject, this)}">${videoEscape(c.label)}</div>`).join('');
+}
+function filterVideosBySubject(subject, element) {
+  VIDEO_STATE.subject = subject;
+  document.querySelectorAll('#video-subject-filters .filter-chip').forEach(chip => chip.classList.toggle('active', chip === element || chip.textContent.trim() === subject));
+  renderVideos();
+}
+function filterVideos() {
+  VIDEO_STATE.search = (document.getElementById('video-search')?.value || '').trim().toLowerCase();
+  renderVideos();
+}
+function renderVideos() {
+  const grid = document.getElementById('video-grid');
+  const count = document.getElementById('video-count');
+  if (!grid) return;
+  const list = VIDEO_STATE.items.filter(v => {
+    const matchesSubject = VIDEO_STATE.subject === 'All' || v.subject === VIDEO_STATE.subject;
+    const text = [v.title, v.subject, v.description, v.grade].filter(x => x != null).join(' ').toLowerCase();
+    return matchesSubject && text.includes(VIDEO_STATE.search);
+  });
+  if (count) count.textContent = `${list.length} video${list.length === 1 ? '' : 's'}`;
+  if (!list.length) {
+    grid.innerHTML = `<div class="card"><div class="card-body" style="padding:28px;text-align:center;color:var(--text-muted)"><i class="fas fa-circle-play" style="font-size:28px;margin-bottom:12px;display:block;opacity:.45"></i>${VIDEO_STATE.items.length ? 'No videos match your search.' : 'No video lessons are available yet. Please check back soon.'}</div></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(v => {
+    const subject = videoEscape(v.subject || 'General');
+    const title = videoEscape(v.title || 'Untitled lesson');
+    const grade = v.grade == null ? 'Grades 8–12' : `Grade ${videoEscape(v.grade)}`;
+    const emoji = VIDEO_SUBJECT_ICONS[v.subject] || '🎬';
+    const thumbnail = typeof v.thumbnail === 'string' && /^https?:\/\//i.test(v.thumbnail) ? v.thumbnail : '';
+    const cover = thumbnail
+      ? `<img src="${videoEscape(thumbnail)}" alt="" loading="lazy" style="width:100%;height:132px;object-fit:cover">`
+      : `<div style="background:linear-gradient(135deg,#1a3a8f,#2548b5);height:132px;display:flex;align-items:center;justify-content:center;color:white;font-size:38px">${emoji}</div>`;
+    return `<article class="card" style="overflow:hidden;cursor:pointer" role="button" tabindex="0" data-video-id="${videoEscape(v.id)}" onclick="playVideo(this.dataset.videoId)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();playVideo(this.dataset.videoId)}">
+      <div style="position:relative">${cover}<span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.62);color:white;display:flex;align-items:center;justify-content:center"><i class="fas fa-play"></i></span></div>
+      <div class="card-body"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">${subject}</div><div style="font-weight:600;font-size:14px;margin-bottom:8px;overflow-wrap:anywhere">${title}</div><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><span style="font-size:12px;color:var(--text-muted)">${grade}</span><span class="badge badge-gray">${videoEscape(v.duration || 'Video lesson')}</span></div>${v.description ? `<p style="font-size:12px;color:var(--text-muted);margin:9px 0 0;line-height:1.45">${videoEscape(v.description)}</p>` : ''}</div></article>`;
+  }).join('');
+}
+function getPlayableVideoUrl(raw) {
+  if (typeof raw !== 'string' || !raw.trim()) return null;
+  try {
+    const url = new URL(raw.trim());
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+    if (/youtube\.com$|(^|\.)youtube\.com$/.test(url.hostname) || url.hostname === 'youtu.be' || url.hostname === 'www.youtube-nocookie.com') {
+      let id = '';
+      if (url.hostname === 'youtu.be') id = url.pathname.slice(1).split('/')[0];
+      else if (url.pathname === '/watch') id = url.searchParams.get('v') || '';
+      else { const match = url.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/); if (match) id = match[1]; }
+      return id && id !== 'REPLACE_ME' ? { type: 'embed', url: `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0` } : null;
+    }
+    if (url.hostname === 'vimeo.com' || url.hostname === 'www.vimeo.com' || url.hostname === 'player.vimeo.com') {
+      const match = url.pathname.match(/(?:video\/)?(\d+)/);
+      return match ? { type: 'embed', url: `https://player.vimeo.com/video/${match[1]}?autoplay=1` } : { type: 'link', url: url.href };
+    }
+    if (/\.(mp4|webm|ogg)$/i.test(url.pathname)) return { type: 'video', url: url.href };
+    return { type: 'link', url: url.href };
+  } catch { return null; }
+}
+function playVideo(id) {
+  const item = VIDEO_STATE.items.find(v => String(v.id) === String(id));
+  if (!item) return;
+  const playable = getPlayableVideoUrl(item.video_url);
+  let modal = document.getElementById('video-player-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'video-player-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:10050;background:rgba(7,15,35,.86);display:flex;align-items:center;justify-content:center;padding:16px;';
+    modal.addEventListener('click', e => { if (e.target === modal) closeVideoPlayer(); });
+    document.body.appendChild(modal);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideoPlayer(); });
+  }
+  let player = '<div style="padding:32px;text-align:center;color:#fff">This lesson does not have a playable video link yet.</div>';
+  if (playable?.type === 'embed') player = `<iframe src="${videoEscape(playable.url)}" title="${videoEscape(item.title)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;aspect-ratio:16/9;border:0;background:#000"></iframe>`;
+  else if (playable?.type === 'video') player = `<video src="${videoEscape(playable.url)}" controls autoplay playsinline style="width:100%;max-height:70vh;background:#000"></video>`;
+  else if (playable?.type === 'link') player = `<div style="padding:32px;text-align:center;color:#fff"><p>This lesson opens on an external video site.</p><a href="${videoEscape(playable.url)}" target="_blank" rel="noopener noreferrer" style="color:#a9c5ff;text-decoration:underline">Open video in a new tab</a></div>`;
+  modal.innerHTML = `<div role="dialog" aria-modal="true" aria-label="${videoEscape(item.title)}" style="width:min(900px,100%);max-height:95vh;overflow:auto;background:#101827;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.4)"><div style="display:flex;align-items:center;gap:16px;justify-content:space-between;padding:14px 18px;color:#fff"><div><div style="font-weight:700">${videoEscape(item.title)}</div><div style="font-size:12px;opacity:.7;margin-top:4px">${videoEscape(item.subject || '')}${item.grade == null ? '' : ` · Grade ${videoEscape(item.grade)}`}</div></div><button type="button" onclick="closeVideoPlayer()" aria-label="Close video" style="border:0;border-radius:8px;background:#263247;color:#fff;padding:9px 13px;cursor:pointer"><i class="fas fa-times"></i> Close</button></div>${player}</div>`;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeVideoPlayer() {
+  const modal = document.getElementById('video-player-modal');
+  if (modal) { modal.style.display = 'none'; modal.innerHTML = ''; }
+  document.body.style.overflow = '';
+}
 
 // ─── CHAT BOT ──────────────────────────────────────────────────────────────────
 let chatHistory = []; // { role: 'user'|'assistant', content: string }
