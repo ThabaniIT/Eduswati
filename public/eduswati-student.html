@@ -2519,56 +2519,122 @@ function setMobActive(el) {
   el.classList.add('active');
 }
 
-// ─── EBOOK DATA ───────────────────────────────────────────────────────────────
-const books = [
-  { title: 'Mathematics Grade 11', subject: 'Mathematics', grade: 'Gr 11', emoji: '📐', color: '#eef2ff', pages: 328 },
-  { title: 'Mathematics Grade 10', subject: 'Mathematics', grade: 'Gr 10', emoji: '📐', color: '#eef2ff', pages: 298 },
-  { title: 'Physical Science', subject: 'Physical Science', grade: 'Gr 11', emoji: '🔬', color: '#e6f7f2', pages: 412 },
-  { title: 'Chemistry Basics', subject: 'Physical Science', grade: 'Gr 10', emoji: '⚗️', color: '#e6f7f2', pages: 310 },
-  { title: 'Biology Essentials', subject: 'Biology', grade: 'Gr 11', emoji: '🧬', color: '#fff0f0', pages: 290 },
-  { title: 'Human Body Systems', subject: 'Biology', grade: 'Gr 10', emoji: '🫀', color: '#fff0f0', pages: 240 },
-  { title: 'English Language & Lit.', subject: 'English', grade: 'Gr 11', emoji: '📖', color: '#fffbea', pages: 188 },
-  { title: 'Essay Writing Guide', subject: 'English', grade: 'Gr 12', emoji: '✍️', color: '#fffbea', pages: 120 },
-  { title: 'History of Africa', subject: 'History', grade: 'Gr 11', emoji: '🌍', color: '#f3effb', pages: 356 },
-  { title: 'World History 20th C.', subject: 'History', grade: 'Gr 12', emoji: '📜', color: '#f3effb', pages: 400 },
-  { title: 'Physical Geography', subject: 'Geography', grade: 'Gr 11', emoji: '🗺️', color: '#eafbf0', pages: 280 },
-  { title: 'Human Geography', subject: 'Geography', grade: 'Gr 10', emoji: '🌐', color: '#eafbf0', pages: 240 },
-];
+// ─── EBOOK DATA (loaded from Supabase through the student API) ────────────────
+let books = [];
 let activeSubject = 'All', searchText = '';
+
+function escapeBookText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
 
 function renderBooks() {
   const grid = document.getElementById('ebook-grid');
+  if (!grid) return;
+
   const filtered = books.filter(b => {
-    const matchSub = activeSubject === 'All' || b.subject === activeSubject;
-    const matchSearch = b.title.toLowerCase().includes(searchText) || b.subject.toLowerCase().includes(searchText);
+    const subject = String(b.subject || 'General');
+    const title = String(b.title || 'Untitled eBook');
+    const matchSub = activeSubject === 'All' || subject === activeSubject;
+    const matchSearch = title.toLowerCase().includes(searchText) || subject.toLowerCase().includes(searchText);
     return matchSub && matchSearch;
   });
-  document.getElementById('book-count').textContent = filtered.length + ' book' + (filtered.length !== 1 ? 's' : '');
-  grid.innerHTML = filtered.map(b => `
-    <div class="ebook-card" onclick="openBook('${b.title}')">
-      <div class="ebook-cover" style="background:${b.color}">${b.emoji}</div>
-      <div class="ebook-info">
-        <div class="ebook-subject">${b.subject}</div>
-        <div class="ebook-title">${b.title}</div>
-        <div class="ebook-grade">${b.grade} · ${b.pages} pages</div>
-      </div>
-    </div>
-  `).join('');
+
+  const count = document.getElementById('book-count');
+  if (count) count.textContent = filtered.length + ' book' + (filtered.length !== 1 ? 's' : '');
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:28px;text-align:center;color:var(--text-muted)">No eBooks found for this filter yet.</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map((b, index) => {
+    const title = escapeBookText(b.title || 'Untitled eBook');
+    const subject = escapeBookText(b.subject || 'General');
+    const grade = b.grade ? 'Grade ' + escapeBookText(b.grade) : 'All grades';
+    const pages = Number(b.pages) > 0 ? ' · ' + Number(b.pages) + ' pages' : '';
+    const emoji = escapeBookText(b.emoji || '📘');
+    const color = /^#[0-9a-f]{3,8}$/i.test(b.color || '') ? b.color : '#eef2ff';
+    return `
+      <div class="ebook-card" role="button" tabindex="0" data-book-index="${index}" onclick="openBookFromCard(this)">
+        <div class="ebook-cover" style="background:${color}">${emoji}</div>
+        <div class="ebook-info">
+          <div class="ebook-subject">${subject}</div>
+          <div class="ebook-title">${title}</div>
+          <div class="ebook-grade">${grade}${pages}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Keep keyboard users able to open the same cards as mouse/touch users.
+  grid.querySelectorAll('.ebook-card').forEach(card => {
+    card.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openBookFromCard(card);
+      }
+    });
+  });
 }
+
+async function loadBooks() {
+  const grid = document.getElementById('ebook-grid');
+  if (grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:28px;text-align:center;color:var(--text-muted)">Loading eBooks from your library…</div>';
+
+  try {
+    const result = await apiGet('/api/student/ebooks');
+    books = Array.isArray(result.ebooks) ? result.ebooks : [];
+
+    // Populate subject filters from real library records while preserving the All option.
+    const filterBox = document.getElementById('subject-filters');
+    if (filterBox) {
+      const subjects = [...new Set(books.map(b => b.subject).filter(Boolean))].sort();
+      filterBox.innerHTML = '<button class="filter-chip active" type="button" data-subject="All">All</button>' +
+        subjects.map(subject => `<button class="filter-chip" type="button" data-subject="${escapeBookText(subject)}">${escapeBookText(subject)}</button>`).join('');
+      filterBox.querySelectorAll('[data-subject]').forEach(button => {
+        button.addEventListener('click', () => filterBySubject(button.dataset.subject || 'All', button));
+      });
+    }
+    renderBooks();
+  } catch (error) {
+    console.error('Could not load eBooks:', error);
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;padding:28px;text-align:center;color:var(--text-muted)">We could not load the eBook library. Please refresh the page and try again.</div>';
+    const count = document.getElementById('book-count');
+    if (count) count.textContent = 'Library unavailable';
+  }
+}
+
 function filterBySubject(sub, el) {
   activeSubject = sub;
   document.querySelectorAll('#subject-filters .filter-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
+  if (el) el.classList.add('active');
   renderBooks();
 }
 function filterBooks() {
-  searchText = document.getElementById('ebook-search').value.toLowerCase();
+  searchText = (document.getElementById('ebook-search')?.value || '').toLowerCase().trim();
   renderBooks();
 }
-function openBook(title) {
-  alert('Opening: ' + title + '\n\n(In production this opens the PDF reader)');
+function openBookFromCard(card) {
+  const index = Number(card?.dataset?.bookIndex);
+  const book = books[index];
+  if (book) openBook(book);
 }
-renderBooks();
+function openBook(bookOrTitle) {
+  const book = typeof bookOrTitle === 'string'
+    ? books.find(b => b.title === bookOrTitle)
+    : bookOrTitle;
+  if (!book) return;
+
+  const url = typeof book.file_url === 'string' ? book.file_url.trim() : '';
+  if (url && /^https?:\/\//i.test(url)) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  alert('“' + (book.title || 'This eBook') + '” is listed in the library, but its PDF/file link has not been added yet. Please contact your teacher or the EduSwati administrator.');
+}
+
+loadBooks();
 
 // ─── CHAT BOT ──────────────────────────────────────────────────────────────────
 let chatHistory = []; // { role: 'user'|'assistant', content: string }
