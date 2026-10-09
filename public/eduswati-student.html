@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>EduSwati — Student Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
@@ -716,648 +716,19 @@ h1, h2, h3, .brand { font-family: 'Syne', sans-serif; }
 }
 .page.active { animation: fadeUp 0.3s ease; }
 
-/* =========================================================
-   EDUSWATI — MOBILE RESPONSIVE LAYOUT
-   Safe mobile scrolling / cards / ebooks / charts / tables
-   ========================================================= */
-
-/* ---------- GLOBAL SAFETY ---------- */
-
-html {
-  width: 100%;
-  min-height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  width: 100%;
-  min-width: 0;
-  min-height: 100vh;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.main {
-  min-width: 0;
-  width: 100%;
-}
-
-.content {
-  min-width: 0;
-  width: 100%;
-  overflow-x: hidden;
-}
-
-.page {
-  width: 100%;
-  min-width: 0;
-  overflow: visible;
-}
-
-.page.active {
-  width: 100%;
-  min-width: 0;
-  overflow: visible;
-}
-
-
-/* ---------- PREVENT GRID/FLEX CHILDREN FROM OVERFLOWING ---------- */
-
-.two-col,
-.three-col,
-.chat-layout,
-.profile-layout,
-.stats-grid,
-.ebook-grid,
-.plans-grid {
-  min-width: 0;
-}
-
-.two-col > *,
-.three-col > *,
-.chat-layout > *,
-.profile-layout > *,
-.stats-grid > *,
-.ebook-grid > *,
-.plans-grid > * {
-  min-width: 0;
-}
-
-
-/* ---------- CARDS ---------- */
-
-.card {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.card-head {
-  min-width: 0;
-}
-
-.card-body {
-  min-width: 0;
-  overflow: visible;
-}
-
-
-/* ---------- TEXT SHOULD WRAP INSTEAD OF PUSHING PAGE ---------- */
-
-h1,
-h2,
-h3,
-h4,
-p,
-span,
-label,
-.card-title,
-.item-row-title,
-.item-row-sub,
-.stat-label,
-.stat-val,
-.ebook-title,
-.ebook-meta,
-.plan-name,
-.plan-price,
-.plan-period {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-
-/* ---------- IMAGES / MEDIA ---------- */
-
-img,
-video,
-canvas,
-svg {
-  max-width: 100%;
-}
-
-img {
-  height: auto;
-}
-
-
-/* ---------- TABLES ---------- */
-
-.table-wrap,
-.table-container,
-.table-responsive {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
-}
-
-table {
-  max-width: 100%;
-}
-
-.table-wrap table,
-.table-container table,
-.table-responsive table {
-  min-width: 460px;
-}
-
-
-/* =========================================================
-   TABLET / MOBILE — 900px AND BELOW
-   ========================================================= */
-
+/* ─── PROFILE RESPONSIVE ─── */
 @media (max-width: 900px) {
-
-  /* Main application layout */
-  .sidebar {
-    transform: translateX(-100%);
-    width: var(--sidebar-w);
-    max-width: 85vw;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.3);
-    z-index: 100;
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .sidebar-close-btn {
-    display: block;
-  }
-
-  .main {
-    margin-left: 0;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .menu-toggle {
-    display: flex;
-  }
-
-  .topbar {
-    width: 100%;
-    padding: 0 14px;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-
-  .content {
-    width: 100%;
-    max-width: 100%;
-    padding: 16px 14px 86px;
-    overflow-x: hidden;
-    overflow-y: visible;
-  }
-
-
-  /* ---------- DASHBOARD GRIDS ---------- */
-
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    width: 100%;
-  }
-
-  .two-col,
-  .three-col,
-  .chat-layout {
-    grid-template-columns: minmax(0, 1fr);
-    width: 100%;
-    gap: 14px;
-  }
-
-  .profile-layout {
-    grid-template-columns: minmax(0, 1fr);
-    width: 100%;
-  }
-
-
-  /* ---------- STAT CARDS ---------- */
-
-  .stat-card {
-    min-width: 0;
-    width: 100%;
-  }
-
-  .stat-val {
-    min-width: 0;
-  }
-
-
-  /* ---------- EBOOKS ---------- */
-
-  .ebook-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-    width: 100%;
-  }
-
-  .ebook-card {
-    min-width: 0;
-    width: 100%;
-  }
-
-  .ebook-cover {
-    width: 100%;
-    max-width: 100%;
-  }
-
-
-  /* ---------- CHARTS ---------- */
-
-  .chart-wrap {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .chart-wrap canvas {
-    max-width: 100% !important;
-  }
-
-
-  /* ---------- CHAT ---------- */
-
-  .chat-window {
-    height: 460px;
-    max-height: 65vh;
-    min-height: 320px;
-  }
-
-  .chat-sidebar {
-    display: none;
-  }
-
-
-  /* ---------- FILTERS ---------- */
-
-  .filter-row {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    flex-wrap: nowrap;
-    padding-bottom: 6px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-  }
-
-
-  /* ---------- FORMS ---------- */
-
-  .form-row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  input,
-  select,
-  textarea {
-    max-width: 100%;
-  }
-
-
-  /* ---------- SUBSCRIPTION ---------- */
-
-  .sub-meta {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .sub-meta-item {
-    min-width: 0;
-  }
-
-  .plans-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-
-  /* ---------- MOBILE NAVIGATION ---------- */
-
-  .mobile-nav {
-    display: flex;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: var(--mobile-nav-h);
-    z-index: 80;
-  }
-
-
-  /* ---------- MODALS ---------- */
-
-  .modal-overlay {
-    padding: 10px;
-    overflow-y: auto;
-    align-items: flex-start;
-  }
-
-  .modal-box {
-    width: 100%;
-    max-width: 460px;
-    max-height: calc(100vh - 20px);
-    margin: auto;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+  .profile-layout { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .plans-grid { grid-template-columns: repeat(2, 1fr); }
+  .sub-meta { grid-template-columns: 1fr 1fr; }
+  .sub-meta-item:nth-child(3) { border-top: 1px solid var(--border); grid-column: 1/-1; border-right: none; }
 }
-
-
-/* =========================================================
-   PHONES — 520px AND BELOW
-   ========================================================= */
-
 @media (max-width: 520px) {
-
-  /* ---------- PAGE ---------- */
-
-  html,
-  body {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
-  .main,
-  .content,
-  .page {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .content {
-    padding: 14px 10px calc(var(--mobile-nav-h) + 24px);
-  }
-
-
-  /* ---------- TOP BAR ---------- */
-
-  .topbar {
-    padding: 0 10px;
-    gap: 8px;
-  }
-
-
-  /* ---------- STATS ---------- */
-
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-
-  .stat-card {
-    padding: 12px 10px;
-    min-width: 0;
-  }
-
-  .stat-val {
-    font-size: 20px;
-    line-height: 1.1;
-  }
-
-  .stat-icon {
-    display: none;
-  }
-
-
-  /* ---------- ALL COLUMNS BECOME ONE COLUMN ---------- */
-
-  .two-col,
-  .three-col,
-  .chat-layout,
-  .profile-layout {
-    grid-template-columns: minmax(0, 1fr);
-    width: 100%;
-    gap: 12px;
-  }
-
-
-  /* ---------- EBOOK LIBRARY ---------- */
-
-  .ebook-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .ebook-card {
-    min-width: 0;
-    width: 100%;
-  }
-
-  .ebook-cover {
-    height: 110px;
-    font-size: 30px;
-  }
-
-
-  /* ---------- CHARTS ---------- */
-
-  .chart-wrap {
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-  }
-
-  .chart-wrap canvas {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-
-  /* ---------- TABLES ---------- */
-
-  .table-wrap,
-  .table-container,
-  .table-responsive {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
-  }
-
-
-  /* ---------- FILTER BUTTONS ---------- */
-
-  .filter-row {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    flex-wrap: nowrap;
-    gap: 8px;
-    padding-bottom: 6px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-
-  /* ---------- SUBSCRIPTION ---------- */
-
-  .sub-meta {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sub-meta-item {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .sub-meta-item:last-child {
-    border-bottom: none;
-  }
-
-  .plans-grid {
-    grid-template-columns: minmax(0, 1fr);
-    width: 100%;
-  }
-
-
-  /* ---------- PLAN CARDS ---------- */
-
-  .plan-card {
-    width: 100%;
-    min-width: 0;
-  }
-
-
-  /* ---------- CHAT ---------- */
-
-  .chat-window {
-    width: 100%;
-    height: 60vh;
-    min-height: 320px;
-    max-height: 500px;
-  }
-
-
-  /* ---------- ITEM ROWS ---------- */
-
-  .item-row {
-    width: 100%;
-    min-width: 0;
-    padding: 11px 12px;
-  }
-
-  .item-row-main {
-    min-width: 0;
-  }
-
-  .item-row-actions {
-    flex-shrink: 0;
-  }
-
-
-  /* ---------- MODALS ---------- */
-
-  .modal-overlay {
-    padding: 8px;
-  }
-
-  .modal-box {
-    width: 100%;
-    max-width: 100%;
-    max-height: calc(100vh - 16px);
-  }
-
-  .modal-body {
-    padding: 16px;
-  }
-
-
-  /* ---------- TABS ---------- */
-
-  .tab-row {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .tab-btn {
-    flex-shrink: 0;
-    padding: 10px 14px;
-  }
-
-
-  /* ---------- TOAST ---------- */
-
-  .toast {
-    left: 10px;
-    right: 10px;
-    bottom: calc(var(--mobile-nav-h) + 10px);
-    max-width: none;
-  }
-
-
-  /* ---------- MOBILE BOTTOM NAV ---------- */
-
-  .mobile-nav {
-    height: var(--mobile-nav-h);
-    padding: 0 2px;
-  }
-
-  .mob-nav-item {
-    min-width: 0;
-    padding: 6px 2px;
-  }
-
-  .mob-nav-item i {
-    font-size: 17px;
-  }
-
-  .mob-nav-item span {
-    font-size: 8px;
-  }
-}
-
-
-/* =========================================================
-   VERY SMALL PHONES — 380px AND BELOW
-   ========================================================= */
-
-@media (max-width: 380px) {
-
-  .content {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .stats-grid {
-    gap: 6px;
-  }
-
-  .stat-card {
-    padding: 10px 8px;
-  }
-
-  .stat-val {
-    font-size: 18px;
-  }
-
-  .ebook-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .ebook-cover {
-    height: 100px;
-  }
-
-  .mob-nav-item span {
-    font-size: 7px;
-  }
+  .plans-grid { grid-template-columns: 1fr; }
+  .sub-meta { grid-template-columns: 1fr; }
+  .sub-meta-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .sub-meta-item:last-child { border-bottom: none; }
 }
 
 /* ─── MOBILE BOTTOM NAV ─── */
@@ -1408,6 +779,64 @@ table {
   .ebook-grid { grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); }
   .filter-row { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
 }
+
+
+/* ─── PHASE 1 DASHBOARD REDESIGN ─── */
+.dashboard-hero {
+  display:grid; grid-template-columns:minmax(0,1.4fr) minmax(220px,0.8fr);
+  gap:16px; margin-bottom:16px;
+}
+.dashboard-welcome, .dashboard-quote {
+  border-radius:var(--radius); padding:22px; min-width:0;
+}
+.dashboard-welcome {
+  color:#fff; background:linear-gradient(135deg,var(--royal-dark),var(--royal));
+  display:flex; flex-direction:column; justify-content:space-between; gap:16px;
+}
+.dashboard-welcome h1 { font-size:clamp(22px,3vw,30px); line-height:1.2; margin:5px 0 8px; }
+.dashboard-date { color:rgba(255,255,255,.75); font-size:12px; }
+.dashboard-clock { font-size:clamp(22px,3vw,30px); font-weight:700; letter-spacing:.5px; }
+.dashboard-welcome p { color:rgba(255,255,255,.78); line-height:1.5; max-width:520px; }
+.dashboard-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.dashboard-actions button { border:0; border-radius:9px; padding:10px 13px; font:600 12px 'DM Sans',sans-serif; cursor:pointer; }
+.dashboard-actions .primary { background:var(--gold); color:var(--royal-dark); }
+.dashboard-actions .secondary { background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.2); }
+.dashboard-quote { background:#fff8e7; border:1px solid rgba(217,165,32,.25); display:flex; flex-direction:column; justify-content:center; gap:12px; }
+.dashboard-quote .quote-mark { font-size:28px; color:var(--gold-dark); line-height:1; }
+.dashboard-quote blockquote { font-family:'Syne',sans-serif; font-weight:600; font-size:16px; line-height:1.5; }
+.dashboard-quote .quote-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.7px; }
+.dashboard-section { margin-bottom:16px; min-width:0; }
+.dashboard-section-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+.dashboard-section-head h2 { font-size:16px; }
+.dashboard-link { border:0; background:none; color:var(--royal); font:600 12px 'DM Sans',sans-serif; cursor:pointer; }
+.dashboard-summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.dashboard-summary-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:15px; min-width:0; }
+.dashboard-summary-card .summary-label { color:var(--text-muted); font-size:12px; margin-bottom:8px; }
+.dashboard-summary-card .summary-value { font-family:'Syne',sans-serif; font-size:24px; font-weight:700; overflow-wrap:anywhere; }
+.dashboard-summary-card .summary-note { color:var(--text-muted); font-size:11px; margin-top:5px; }
+.dashboard-lower-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:16px; align-items:start; }
+.dashboard-list { display:flex; flex-direction:column; }
+.dashboard-list-item { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); min-width:0; }
+.dashboard-list-item:last-child { border-bottom:0; }
+.dashboard-list-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:rgba(26,58,143,.08); color:var(--royal); }
+.dashboard-list-copy { min-width:0; flex:1; }
+.dashboard-list-copy strong { display:block; font-size:13px; overflow-wrap:anywhere; }
+.dashboard-list-copy small { display:block; color:var(--text-muted); font-size:11px; margin-top:4px; line-height:1.4; }
+.dashboard-empty { color:var(--text-muted); font-size:13px; padding:14px 0; line-height:1.5; }
+@media (max-width:900px) {
+  .dashboard-hero { grid-template-columns:1fr; }
+  .dashboard-lower-grid { grid-template-columns:1fr; }
+}
+@media (max-width:520px) {
+  .dashboard-welcome, .dashboard-quote { padding:17px; }
+  .dashboard-summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .dashboard-summary-card { padding:12px; }
+  .dashboard-summary-card .summary-value { font-size:21px; }
+  .dashboard-summary-grid .dashboard-summary-card:last-child { grid-column:1/-1; }
+  .dashboard-actions button { flex:1; }
+  .dashboard-quote blockquote { font-size:15px; }
+}
+
 </style>
 </head>
 <body>
@@ -1455,9 +884,6 @@ table {
     </button>
     <button class="nav-item" onclick="showPage('alarms', this)">
       <i class="fas fa-bell"></i> Study Alarms
-    </button>
-    <button class="nav-item" onclick="showPage('mystats', this)">
-      <i class="fas fa-chart-bar"></i> My Statistics
     </button>
   </div>
 
@@ -1513,132 +939,108 @@ table {
 
   <div class="content">
 
-    <!-- ═══ DASHBOARD ═══ -->
+    <!-- ═══ DASHBOARD / STUDY HOME ═══ -->
     <div class="page active" id="page-dashboard">
-      <div class="stats-grid" id="dash-study-widgets" style="margin-bottom:16px"></div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Courses Enrolled</div>
-          <div class="stat-val">8</div>
-          <div class="stat-change up"><i class="fas fa-arrow-up"></i> 2 this term</div>
-          <div class="stat-icon si-blue"><i class="fas fa-book"></i></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Overall Progress</div>
-          <div class="stat-val">73%</div>
-          <div class="stat-change up"><i class="fas fa-arrow-up"></i> +8% this month</div>
-          <div class="stat-icon si-gold"><i class="fas fa-chart-pie"></i></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Study Hours</div>
-          <div class="stat-val">142</div>
-          <div class="stat-change up"><i class="fas fa-arrow-up"></i> 12 hrs this week</div>
-          <div class="stat-icon si-green"><i class="fas fa-clock"></i></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">eBooks Read</div>
-          <div class="stat-val">24</div>
-          <div class="stat-change down"><i class="fas fa-arrow-down"></i> 3 pending</div>
-          <div class="stat-icon si-red"><i class="fas fa-file-pdf"></i></div>
-        </div>
-      </div>
-
-      <div class="two-col" style="margin-bottom:16px">
-        <div class="card">
-          <div class="card-head">
-            <span class="card-title">Weekly Study Activity</span>
-            <span class="badge badge-blue">This Week</span>
+      <section class="dashboard-hero" aria-label="Daily study welcome">
+        <div class="dashboard-welcome">
+          <div>
+            <div class="dashboard-date" id="dashboard-date">Loading today's date…</div>
+            <h1 id="dashboard-greeting">Welcome to EduSwati</h1>
+            <p id="dashboard-welcome-copy">Your learning journey, one focused study session at a time.</p>
           </div>
-          <div class="card-body">
-            <div class="chart-legend">
-              <span><span class="legend-dot" style="background:#1a3a8f"></span>Hours Studied</span>
-              <span><span class="legend-dot" style="background:#ffc642"></span>Lessons Done</span>
-            </div>
-            <div class="chart-wrap" style="height:190px">
-              <canvas id="weeklyChart"></canvas>
+          <div>
+            <div class="dashboard-clock" id="dashboard-clock" aria-live="off">--:--</div>
+            <div class="dashboard-actions" style="margin-top:14px">
+              <button class="primary" onclick="showPage('library', null)"><i class="fas fa-book-open"></i> Continue learning</button>
+              <button class="secondary" onclick="showPage('planner', null)"><i class="fas fa-calendar-check"></i> Plan study time</button>
             </div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-head">
-            <span class="card-title">Subject Progress</span>
-            <span class="badge badge-gold">Grade 11</span>
-          </div>
-          <div class="card-body">
-            <div class="prog-item"><div class="prog-top"><span class="prog-name">Mathematics</span><span class="prog-pct">88%</span></div><div class="prog-bar"><div class="prog-fill" style="width:88%"></div></div></div>
-            <div class="prog-item"><div class="prog-top"><span class="prog-name">English Language</span><span class="prog-pct">74%</span></div><div class="prog-bar"><div class="prog-fill gold" style="width:74%"></div></div></div>
-            <div class="prog-item"><div class="prog-top"><span class="prog-name">Physical Science</span><span class="prog-pct">61%</span></div><div class="prog-bar"><div class="prog-fill" style="width:61%"></div></div></div>
-            <div class="prog-item"><div class="prog-top"><span class="prog-name">Biology</span><span class="prog-pct">52%</span></div><div class="prog-bar"><div class="prog-fill green" style="width:52%"></div></div></div>
-            <div class="prog-item"><div class="prog-top"><span class="prog-name">History</span><span class="prog-pct">79%</span></div><div class="prog-bar"><div class="prog-fill red" style="width:79%"></div></div></div>
-          </div>
+        <div class="dashboard-quote">
+          <div class="quote-mark"><i class="fas fa-quote-left"></i></div>
+          <div class="quote-label">Today's study inspiration</div>
+          <blockquote id="dashboard-quote-text">Small, consistent steps can lead to meaningful progress.</blockquote>
+          <div id="dashboard-quote-attribution" style="font-size:12px;color:var(--text-muted)">A reminder for your study session</div>
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">Recent Activity</span>
-          <span style="font-size:12px;color:var(--text-muted);cursor:pointer">View all</span>
+      <section class="dashboard-section">
+        <div class="dashboard-section-head">
+          <h2>Your learning snapshot</h2>
+          <button class="dashboard-link" onclick="showPage('progress', null)">View My Progress <i class="fas fa-arrow-right"></i></button>
         </div>
-        <div class="card-body" style="padding:0">
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead><tr><th>Resource</th><th>Subject</th><th>Type</th><th>Date</th><th>Status</th></tr></thead>
-              <tbody>
-                <tr><td>Ch. 7: Quadratic Equations</td><td>Mathematics</td><td><span class="badge badge-blue">eBook</span></td><td>Today</td><td><span class="badge badge-green">Completed</span></td></tr>
-                <tr><td>Newton's Laws of Motion</td><td>Physical Science</td><td><span class="badge badge-gold">Video</span></td><td>Yesterday</td><td><span class="badge badge-green">Completed</span></td></tr>
-                <tr><td>Essay Writing Techniques</td><td>English</td><td><span class="badge badge-blue">eBook</span></td><td>2 days ago</td><td><span class="badge badge-red">In Progress</span></td></tr>
-                <tr><td>Cell Division &amp; Mitosis</td><td>Biology</td><td><span class="badge badge-gold">Video</span></td><td>3 days ago</td><td><span class="badge badge-green">Completed</span></td></tr>
-                <tr><td>World War II Overview</td><td>History</td><td><span class="badge badge-blue">eBook</span></td><td>4 days ago</td><td><span class="badge badge-gray">Not Started</span></td></tr>
-              </tbody>
-            </table>
+        <div class="dashboard-summary-grid" id="dashboard-summary-grid">
+          <div class="dashboard-summary-card"><div class="summary-label">Average quiz score</div><div class="summary-value">—</div><div class="summary-note">Based on your attempts</div></div>
+          <div class="dashboard-summary-card"><div class="summary-label">Study streak</div><div class="summary-value">—</div><div class="summary-note">Days of study activity</div></div>
+          <div class="dashboard-summary-card"><div class="summary-label">Upcoming tests</div><div class="summary-value">—</div><div class="summary-note">Your next assessments</div></div>
+        </div>
+      </section>
+
+      <div class="dashboard-lower-grid">
+        <section class="card dashboard-section">
+          <div class="card-head">
+            <span class="card-title"><i class="fas fa-calendar-alt" style="color:var(--royal);margin-right:7px"></i>Upcoming school tests</span>
+            <button class="dashboard-link" onclick="showPage('timetable', null)">Open timetable</button>
           </div>
-        </div>
+          <div class="card-body dashboard-list" id="dashboard-upcoming-tests">
+            <div class="dashboard-empty">Loading your upcoming tests…</div>
+          </div>
+        </section>
+        <section class="card dashboard-section">
+          <div class="card-head">
+            <span class="card-title"><i class="fas fa-tasks" style="color:var(--success);margin-right:7px"></i>Today's study plan</span>
+            <button class="dashboard-link" onclick="showPage('planner', null)">Open planner</button>
+          </div>
+          <div class="card-body dashboard-list" id="dashboard-todays-plans">
+            <div class="dashboard-empty">Loading your study plan…</div>
+          </div>
+        </section>
       </div>
     </div>
 
-    <!-- ═══ PROGRESS ═══ -->
+    <!-- ═══ MY PROGRESS: DETAILED PERFORMANCE CENTRE ═══ -->
     <div class="page" id="page-progress">
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Average Score</div><div class="stat-val">71%</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> +4% vs last term</div><div class="stat-icon si-blue"><i class="fas fa-star"></i></div></div>
-        <div class="stat-card"><div class="stat-label">Quizzes Taken</div><div class="stat-val">38</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> 6 this week</div><div class="stat-icon si-gold"><i class="fas fa-check-circle"></i></div></div>
-        <div class="stat-card"><div class="stat-label">Study Streak</div><div class="stat-val">14 days</div><div class="stat-change up"><i class="fas fa-fire"></i> Personal best!</div><div class="stat-icon si-green"><i class="fas fa-fire"></i></div></div>
-        <div class="stat-card"><div class="stat-label">Rank in Grade</div><div class="stat-val">#4</div><div class="stat-change up"><i class="fas fa-arrow-up"></i> Up from #7</div><div class="stat-icon si-red"><i class="fas fa-trophy"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Total Study Hours</div><div class="stat-val" id="ms-total-hours">0</div><div class="stat-icon si-blue"><i class="fas fa-clock"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Average Quiz Score</div><div class="stat-val" id="ms-avg-score">0%</div><div class="stat-icon si-gold"><i class="fas fa-star"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Current Streak</div><div class="stat-val" id="ms-streak">0 days</div><div class="stat-icon si-green"><i class="fas fa-fire"></i></div></div>
+        <div class="stat-card"><div class="stat-label">Tests Completed</div><div class="stat-val" id="ms-tests-completed">0</div><div class="stat-icon si-red"><i class="fas fa-clipboard-check"></i></div></div>
       </div>
       <div class="two-col" style="margin-bottom:16px">
         <div class="card">
-          <div class="card-head"><span class="card-title">Score Trend (6 Months)</span></div>
-          <div class="card-body">
-            <div class="chart-legend">
-              <span><span class="legend-dot" style="background:#1a3a8f"></span>Overall %</span>
-              <span><span class="legend-dot" style="background:#ffc642"></span>Target</span>
-            </div>
-            <div class="chart-wrap" style="height:200px"><canvas id="trendChart"></canvas></div>
-          </div>
+          <div class="card-head"><span class="card-title">Weekly Study Hours</span></div>
+          <div class="card-body"><div class="chart-wrap" style="height:190px"><canvas id="msWeeklyChart"></canvas></div></div>
         </div>
         <div class="card">
-          <div class="card-head"><span class="card-title">Score by Subject</span></div>
+          <div class="card-head"><span class="card-title">Progress by Subject</span></div>
+          <div class="card-body" id="ms-subject-progress"><div class="dashboard-empty">Complete quizzes to build your subject progress report.</div></div>
+        </div>
+      </div>
+      <div class="two-col" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Recent Quiz Performance</span></div>
+          <div class="card-body"><div class="chart-wrap" style="height:180px"><canvas id="msQuizChart"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">Monthly Study Consistency</span></div>
           <div class="card-body">
-            <div class="chart-wrap" style="height:200px"><canvas id="subjectChart"></canvas></div>
+            <div id="ms-consistency-grid" style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px"></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:10px">Each square represents a day in the last 30 days.</div>
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-head"><span class="card-title">Quiz Results History</span><span class="badge badge-blue">Last 10</span></div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head"><span class="card-title">Recent Quiz Results</span><span class="badge badge-blue">Latest attempts</span></div>
         <div class="card-body" style="padding:0">
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead><tr><th>Quiz</th><th>Subject</th><th>Score</th><th>Date</th><th>Grade</th></tr></thead>
-              <tbody>
-                <tr><td>Algebra Mid-Term</td><td>Mathematics</td><td>92%</td><td>May 18</td><td><span class="badge badge-green">A</span></td></tr>
-                <tr><td>Photosynthesis Test</td><td>Biology</td><td>78%</td><td>May 15</td><td><span class="badge badge-blue">B+</span></td></tr>
-                <tr><td>Comprehension Quiz 4</td><td>English</td><td>68%</td><td>May 12</td><td><span class="badge badge-gold">C+</span></td></tr>
-                <tr><td>Forces &amp; Motion</td><td>Physical Science</td><td>84%</td><td>May 10</td><td><span class="badge badge-blue">B+</span></td></tr>
-                <tr><td>WWI Quiz</td><td>History</td><td>55%</td><td>May 7</td><td><span class="badge badge-red">C-</span></td></tr>
-              </tbody>
-            </table>
-          </div>
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>Subject</th><th>Score</th><th>Difficulty</th><th>Date</th></tr></thead>
+            <tbody id="ms-quiz-results-body"><tr><td colspan="4">Your quiz history will appear here after you complete a quiz.</td></tr></tbody>
+          </table></div>
         </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-title">Achievements</span></div>
+        <div class="card-body"><div id="ms-achievements-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px"></div></div>
       </div>
     </div>
 
@@ -1845,45 +1247,6 @@ table {
             <button class="btn-outline" onclick="pomodoroPauseResume()" id="pomodoro-pause-btn"><i class="fas fa-pause"></i> Pause</button>
             <button class="btn-danger" onclick="pomodoroStop()"><i class="fas fa-stop"></i> Stop</button>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ MY STATISTICS ═══ -->
-    <div class="page" id="page-mystats">
-      <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Total Study Hours</div><div class="stat-val" id="ms-total-hours">0</div><div class="stat-icon si-blue"><i class="fas fa-clock"></i></div></div>
-        <div class="stat-card"><div class="stat-label">Average Quiz Score</div><div class="stat-val" id="ms-avg-score">0%</div><div class="stat-icon si-gold"><i class="fas fa-star"></i></div></div>
-        <div class="stat-card"><div class="stat-label">Current Streak</div><div class="stat-val" id="ms-streak">0 days</div><div class="stat-icon si-green"><i class="fas fa-fire"></i></div></div>
-        <div class="stat-card"><div class="stat-label">Tests Completed</div><div class="stat-val" id="ms-tests-completed">0</div><div class="stat-icon si-red"><i class="fas fa-clipboard-check"></i></div></div>
-      </div>
-
-      <div class="two-col" style="margin-bottom:16px">
-        <div class="card">
-          <div class="card-head"><span class="card-title">Weekly Study Hours</span></div>
-          <div class="card-body"><div class="chart-wrap" style="height:190px"><canvas id="msWeeklyChart"></canvas></div></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><span class="card-title">Subject Progress</span></div>
-          <div class="card-body" id="ms-subject-progress"></div>
-        </div>
-      </div>
-
-      <div class="two-col" style="margin-bottom:16px">
-        <div class="card">
-          <div class="card-head"><span class="card-title">Quiz Performance</span></div>
-          <div class="card-body"><div class="chart-wrap" style="height:180px"><canvas id="msQuizChart"></canvas></div></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><span class="card-title">Monthly Consistency</span></div>
-          <div class="card-body"><div id="ms-consistency-grid" style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px"></div></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><span class="card-title">Achievements</span></div>
-        <div class="card-body">
-          <div id="ms-achievements-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px"></div>
         </div>
       </div>
     </div>
@@ -2409,18 +1772,18 @@ table {
 </div><!-- /main -->
 
 <!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-nav">
+<nav class="mobile-nav" aria-label="Student navigation">
   <button class="mob-nav-item active" onclick="showPage('dashboard', null); setMobActive(this)">
     <i class="fas fa-th-large"></i><span>Home</span>
+  </button>
+  <button class="mob-nav-item" onclick="showPage('progress', null); setMobActive(this)">
+    <i class="fas fa-chart-line"></i><span>Progress</span>
   </button>
   <button class="mob-nav-item" onclick="showPage('library', null); setMobActive(this)">
     <i class="fas fa-book-open"></i><span>Library</span>
   </button>
   <button class="mob-nav-item" onclick="showPage('quizzes', null); setMobActive(this)">
     <i class="fas fa-question-circle"></i><span>Quizzes</span>
-  </button>
-  <button class="mob-nav-item" onclick="showPage('chatbot', null); setMobActive(this)">
-    <i class="fas fa-robot"></i><span>EduBot</span>
   </button>
   <button class="mob-nav-item" onclick="showPage('planner', null); setMobActive(this)">
     <i class="fas fa-tasks"></i><span>Planner</span>
@@ -2578,6 +1941,8 @@ window.addEventListener('message', function(e) {
     APP.subscription = e.data.subscription;
     applyProfile();
     applySubscription();
+    updateDashboardIdentity();
+    loadDashboardStudyWidgets();
   }
 });
 
@@ -3044,10 +2409,9 @@ function showPage(id, btn) {
     profile:      ['My Profile', 'Manage your account'],
     subscription: ['Subscription & Billing', 'Manage your plan and payments'],
     quizzes:      ['Quiz Center', 'Test your knowledge across every subject'],
-    timetable:    ['Test Timetable', 'Keep track of every upcoming school test'],
+    timetable:    ['Timetables & Calendar', 'School tests and important dates in one place'],
     planner:      ['Study Planner', 'Plan and organize your study sessions'],
     alarms:       ['Study Alarms', 'Pomodoro timers and study reminders'],
-    mystats:      ['My Statistics', 'Your study habits, at a glance'],
   };
   const t = titles[id] || [id, ''];
   document.getElementById('page-title').textContent = t[0];
@@ -3060,7 +2424,7 @@ function showPage(id, btn) {
   if (id === 'timetable' && !STUDY.timetableLoaded) loadTimetable();
   if (id === 'planner' && !STUDY.plannerLoaded) loadPlanner();
   if (id === 'alarms' && !STUDY.alarmsLoaded) loadAlarms();
-  if (id === 'mystats') loadMyStatistics();
+  if (id === 'progress') loadMyStatistics();
 }
 
 function setMobActive(el) {
@@ -4030,6 +3394,18 @@ function renderMyStatistics(data) {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
   });
 
+  // Recent quiz results table
+  const resultsBody = document.getElementById('ms-quiz-results-body');
+  if (resultsBody) {
+    const results = data.recent_quiz_results || [];
+    resultsBody.innerHTML = results.length ? results.map(r => {
+      const score = Math.round(Number(r.score) || 0);
+      const badge = score >= 80 ? 'badge-green' : score >= 50 ? 'badge-gold' : 'badge-red';
+      const date = r.taken_at ? new Date(r.taken_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' }) : '—';
+      return `<tr><td>${escapeDashboardText(r.subject || 'Quiz')}</td><td><span class="badge ${badge}">${score}%</span></td><td>${escapeDashboardText(r.difficulty || '—')}</td><td>${date}</td></tr>`;
+    }).join('') : '<tr><td colspan="4" style="color:var(--text-muted)">No quiz attempts yet. Complete a practice quiz to start tracking progress.</td></tr>';
+  }
+
   // Monthly consistency grid
   const consistencyEl = document.getElementById('ms-consistency-grid');
   const activeDates = new Set(data.monthly_session_dates || []);
@@ -4070,23 +3446,110 @@ function renderAchievements(earned) {
 // ════════════════════════════════════════════════════════════════════════════
 // DASHBOARD WIDGETS (Study Companion summary on the main Dashboard page)
 // ════════════════════════════════════════════════════════════════════════════
-function loadDashboardStudyWidgets() {
-  apiGet('/api/student/statistics').then(data => {
-    const widgetsHost = document.getElementById('dash-study-widgets');
-    if (!widgetsHost) return;
-    const stats = data.stats || {};
-    const nextTest = (data.upcoming_tests || [])[0];
-    const nextAlarm = data.next_alarm;
-    widgetsHost.innerHTML = `
-      <div class="stat-card"><div class="stat-label">Current Streak</div><div class="stat-val">${stats.current_streak_days || 0} 🔥</div><div class="stat-icon si-gold"><i class="fas fa-fire"></i></div></div>
-      <div class="stat-card"><div class="stat-label">Upcoming Test</div><div class="stat-val" style="font-size:15px">${nextTest ? nextTest.subject : 'None'}</div><div class="stat-change" style="color:var(--text-muted)">${nextTest ? formatDateNice(nextTest.test_date) : 'All caught up'}</div><div class="stat-icon si-blue"><i class="fas fa-calendar-alt"></i></div></div>
-      <div class="stat-card"><div class="stat-label">Today's Tasks</div><div class="stat-val">${(data.todays_plans || []).length}</div><div class="stat-icon si-green"><i class="fas fa-tasks"></i></div></div>
-      <div class="stat-card"><div class="stat-label">Next Alarm</div><div class="stat-val" style="font-size:15px">${nextAlarm ? nextAlarm.alarm_time.slice(0,5) : '—'}</div><div class="stat-icon si-red"><i class="fas fa-bell"></i></div></div>
-    `;
-  }).catch(() => {});
+const DAILY_STUDY_QUOTES = [
+  { text: 'Great things are done by a series of small things brought together.', by: 'Vincent van Gogh' },
+  { text: 'The secret of getting ahead is getting started.', by: 'Mark Twain' },
+  { text: 'It always seems impossible until it is done.', by: 'Nelson Mandela' },
+  { text: 'Learning never exhausts the mind.', by: 'Leonardo da Vinci' },
+  { text: 'Success is the sum of small efforts, repeated day in and day out.', by: 'Robert Collier' },
+  { text: 'You do not have to be great to start, but you have to start to be great.', by: 'Zig Ziglar' },
+  { text: 'The beautiful thing about learning is that nobody can take it away from you.', by: 'B.B. King' }
+];
+
+function escapeDashboardText(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  })[char]);
 }
 
-window.addEventListener('load', () => setTimeout(loadDashboardStudyWidgets, 900));
+function updateDashboardIdentity() {
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const fullName = APP.profile?.full_name || '';
+  const firstName = fullName.trim().split(/\s+/)[0];
+  const grade = APP.profile?.grade ? `Grade ${APP.profile.grade}` : 'your learning journey';
+  const dateEl = document.getElementById('dashboard-date');
+  const greetingEl = document.getElementById('dashboard-greeting');
+  const copyEl = document.getElementById('dashboard-welcome-copy');
+  const quoteEl = document.getElementById('dashboard-quote-text');
+  const byEl = document.getElementById('dashboard-quote-attribution');
+  if (dateEl) dateEl.textContent = now.toLocaleDateString('en-ZA', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  if (greetingEl) greetingEl.textContent = `${greeting}${firstName ? ', ' + firstName : ''}!`;
+  if (copyEl) copyEl.textContent = `A fresh day to make progress in ${grade}. Choose one goal and give it your best effort.`;
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  const quote = DAILY_STUDY_QUOTES[dayOfYear % DAILY_STUDY_QUOTES.length];
+  if (quoteEl) quoteEl.textContent = `“${quote.text}”`;
+  if (byEl) byEl.textContent = `— ${quote.by}`;
+  updateDashboardClock();
+}
+
+function updateDashboardClock() {
+  const clock = document.getElementById('dashboard-clock');
+  if (clock) clock.textContent = new Date().toLocaleTimeString('en-ZA', { hour:'2-digit', minute:'2-digit' });
+}
+
+function renderDashboardTests(tests) {
+  const host = document.getElementById('dashboard-upcoming-tests');
+  if (!host) return;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const upcoming = (tests || []).filter(test => test.test_date && new Date(test.test_date + 'T00:00:00') >= now).slice(0,4);
+  if (!upcoming.length) {
+    host.innerHTML = '<div class="dashboard-empty">No upcoming tests have been added yet. Add your next assessment in Timetables & Calendar.</div>';
+    return;
+  }
+  host.innerHTML = upcoming.map(test => `<div class="dashboard-list-item">
+    <div class="dashboard-list-icon"><i class="fas fa-file-alt"></i></div>
+    <div class="dashboard-list-copy"><strong>${escapeDashboardText(test.subject || 'School assessment')}</strong>
+      <small>${escapeDashboardText(formatDateNice(test.test_date))}${test.test_time ? ' · ' + escapeDashboardText(test.test_time.slice(0,5)) : ''}${test.topic ? ' · ' + escapeDashboardText(test.topic) : ''}</small>
+    </div><span class="badge badge-blue">${daysUntil(test.test_date) === 0 ? 'Today' : daysUntil(test.test_date) + 'd'}</span>
+  </div>`).join('');
+}
+
+function renderDashboardPlans(plans, nextAlarm) {
+  const host = document.getElementById('dashboard-todays-plans');
+  if (!host) return;
+  const list = (plans || []).slice(0,4);
+  let html = list.map(plan => `<div class="dashboard-list-item">
+    <div class="dashboard-list-icon" style="background:rgba(26,158,110,.1);color:var(--success)"><i class="fas fa-book-reader"></i></div>
+    <div class="dashboard-list-copy"><strong>${escapeDashboardText(plan.subject || 'Study session')}${plan.topic ? ' — ' + escapeDashboardText(plan.topic) : ''}</strong>
+      <small>${escapeDashboardText(String(plan.duration_minutes || 0))} minutes · ${escapeDashboardText(String(plan.study_type || 'study').replaceAll('_',' '))}</small>
+    </div><span class="badge ${plan.status === 'completed' ? 'badge-green' : 'badge-gray'}">${escapeDashboardText(plan.status || 'planned')}</span>
+  </div>`).join('');
+  if (nextAlarm?.alarm_time) {
+    html += `<div class="dashboard-list-item"><div class="dashboard-list-icon"><i class="fas fa-bell"></i></div><div class="dashboard-list-copy"><strong>Next study reminder</strong><small>${escapeDashboardText(nextAlarm.alarm_name || 'Study alarm')} · ${escapeDashboardText(nextAlarm.alarm_time.slice(0,5))}</small></div></div>`;
+  }
+  host.innerHTML = html || '<div class="dashboard-empty">Your plan is clear for today. Add a study session in the Study Planner to stay on track.</div>';
+}
+
+function loadDashboardStudyWidgets() {
+  apiGet('/api/student/statistics').then(data => {
+    const stats = data.stats || {};
+    const quizzes = data.recent_quiz_results || [];
+    const avg = stats.average_quiz_score ?? (quizzes.length ? avgScore(quizzes) : 0);
+    const tests = (data.upcoming_tests || []).filter(t => t.status !== 'completed' && t.status !== 'cancelled');
+    const plans = data.todays_plans || [];
+    const host = document.getElementById('dashboard-summary-grid');
+    if (host) host.innerHTML = `
+      <div class="dashboard-summary-card"><div class="summary-label">Average quiz score</div><div class="summary-value">${Math.round(Number(avg) || 0)}%</div><div class="summary-note">${quizzes.length ? 'From your recent quiz attempts' : 'Complete a quiz to start your report'}</div></div>
+      <div class="dashboard-summary-card"><div class="summary-label">Study streak</div><div class="summary-value">${Number(stats.current_streak_days) || 0} days</div><div class="summary-note">Keep building your study habit</div></div>
+      <div class="dashboard-summary-card"><div class="summary-label">Upcoming tests</div><div class="summary-value">${tests.length}</div><div class="summary-note">${plans.length} study task${plans.length === 1 ? '' : 's'} scheduled today</div></div>`;
+    renderDashboardTests(tests);
+    renderDashboardPlans(plans, data.next_alarm);
+  }).catch(() => {
+    const tests = document.getElementById('dashboard-upcoming-tests');
+    const plans = document.getElementById('dashboard-todays-plans');
+    if (tests) tests.innerHTML = '<div class="dashboard-empty">Your timetable could not be loaded right now. You can still open Timetables & Calendar to try again.</div>';
+    if (plans) plans.innerHTML = '<div class="dashboard-empty">Your study plan could not be loaded right now. Please try again shortly.</div>';
+  });
+}
+
+window.addEventListener('load', () => {
+  updateDashboardIdentity();
+  loadDashboardStudyWidgets();
+  setInterval(updateDashboardClock, 30000);
+});
 </script>
 </body>
 </html>
