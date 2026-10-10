@@ -924,72 +924,19 @@ body {
   }
 }
 
-/* ==========================================
-   EDUSWATI: DRAGGABLE MOBILE SIDEBAR
-   ========================================== */
 
+/* EduSwati: sidebar drag support — preserves existing styles */
 @media (max-width: 900px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: min(290px, 85vw);
-    max-width: 85vw;
-    height: 100vh;
-    height: 100dvh;
-    z-index: 1002;
-
-    transform: translateX(-105%);
-    transition: transform 280ms cubic-bezier(.22, 1, .36, 1);
-    will-change: transform;
-
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  /* Smooth movement while the user drags */
-  .sidebar.dragging {
+  #sidebar.dragging {
     transition: none !important;
-    user-select: none;
   }
 
-  /* Background behind the open menu */
-  .sidebar-swipe-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 1001;
-    background: rgba(10, 20, 40, 0.48);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 220ms ease, visibility 220ms ease;
-    -webkit-tap-highlight-color: transparent;
+  #sidebar {
+    will-change: transform;
   }
 
-  .sidebar-swipe-backdrop.visible {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-  }
-
-  /* Keep the page content beneath the sidebar */
-  .content {
-    min-width: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sidebar,
-  .sidebar-swipe-backdrop {
-    transition-duration: 0.01ms !important;
+  #overlay {
+    touch-action: pan-y;
   }
 }
 
@@ -2522,6 +2469,158 @@ function closeSidebar() {
   document.body.style.overflow = '';
 }
 
+/* ─── SIDEBAR EDGE-SWIPE / DRAG SUPPORT ─── */
+(() => {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  if (!sidebar || !overlay) return;
+
+  const mobile = window.matchMedia('(max-width: 900px)');
+  const EDGE = 24;
+  const THRESHOLD = 60;
+
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let startOpen = false;
+  let tracking = false;
+  let dragging = false;
+  let pointerId = null;
+
+  function menuIsOpen() {
+    return sidebar.classList.contains('open');
+  }
+
+  function resetDrag() {
+    sidebar.classList.remove('dragging');
+    sidebar.style.removeProperty('transform');
+    overlay.style.removeProperty('opacity');
+  }
+
+  function start(event) {
+    if (!mobile.matches || event.button > 0) return;
+
+    const x = event.clientX;
+    const y = event.clientY;
+    startOpen = menuIsOpen();
+
+    // Closed menu: start at the screen's left edge.
+    // Open menu: start anywhere on the sidebar.
+    if (!startOpen && x > EDGE) return;
+    if (startOpen && !sidebar.contains(event.target)) return;
+
+    // Preserve normal button clicks and navigation.
+    if (event.target.closest('button, a, input, textarea, select')) {
+      // Allow a swipe starting on the sidebar background,
+      // but never intercept actual interactive controls.
+      return;
+    }
+
+    startX = currentX = x;
+    startY = y;
+    tracking = true;
+    dragging = false;
+    pointerId = event.pointerId;
+  }
+
+  function move(event) {
+    if (!tracking || event.pointerId !== pointerId) return;
+
+    const dx = event.clientX - startX;
+    const dy = event.clientY - startY;
+
+    // Let vertical scrolling work normally.
+    if (!dragging && Math.abs(dy) > Math.abs(dx)) {
+      tracking = false;
+      pointerId = null;
+      return;
+    }
+
+    if (!dragging && Math.abs(dx) < 6) return;
+
+    if (!dragging) {
+      dragging = true;
+      sidebar.classList.add('dragging');
+
+      if (!startOpen) {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+      }
+    }
+
+    if (event.cancelable) event.preventDefault();
+
+    currentX = event.clientX;
+
+    const width = sidebar.getBoundingClientRect().width;
+    if (!width) return;
+
+    // Calculate position from the real sidebar width.
+    const offset = startOpen
+      ? Math.max(-width, Math.min(0, dx))
+      : Math.max(-width, Math.min(0, -width + dx));
+
+    sidebar.style.transform = `translateX(${offset}px)`;
+    overlay.style.opacity = String(
+      Math.max(0, Math.min(1, (offset + width) / width))
+    );
+  }
+
+  function end(event) {
+    if (!tracking || event.pointerId !== pointerId) return;
+
+    const dx = currentX - startX;
+    const wasDragging = dragging;
+
+    tracking = false;
+    dragging = false;
+    pointerId = null;
+
+    if (!wasDragging) return;
+
+    resetDrag();
+
+    if (startOpen) {
+      if (dx < -THRESHOLD) {
+        closeSidebar();
+      } else {
+        openSidebar();
+      }
+    } else {
+      if (dx > THRESHOLD) {
+        openSidebar();
+      } else {
+        closeSidebar();
+      }
+    }
+  }
+
+  document.addEventListener('pointerdown', start, {
+    passive: true
+  });
+
+  document.addEventListener('pointermove', move, {
+    passive: false
+  });
+
+  document.addEventListener('pointerup', end, {
+    passive: true
+  });
+
+  document.addEventListener('pointercancel', end, {
+    passive: true
+  });
+
+  // Clean up drag-only styles when switching to desktop.
+  mobile.addEventListener('change', () => {
+    tracking = false;
+    dragging = false;
+    pointerId = null;
+    resetDrag();
+  });
+})();
+
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -3925,206 +4024,6 @@ window.addEventListener('load', () => {
   setInterval(updateDashboardClock, 30000);
 });
 
-/* ==========================================
-   EDUSWATI: SIDEBAR SWIPE / DRAG CONTROLS
-   ========================================== */
-(() => {
-  const sidebar = document.querySelector('.sidebar');
-  if (!sidebar || sidebar.dataset.swipeReady === 'true') return;
-
-  sidebar.dataset.swipeReady = 'true';
-
-  const mobileQuery = window.matchMedia('(max-width: 900px)');
-  const EDGE_SIZE = 28;
-  const OPEN_THRESHOLD = 65;
-  const CLOSE_THRESHOLD = 65;
-
-  let backdrop = document.querySelector('.sidebar-swipe-backdrop');
-
-  if (!backdrop) {
-    backdrop = document.createElement('div');
-    backdrop.className = 'sidebar-swipe-backdrop';
-    backdrop.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(backdrop);
-  }
-
-  let startX = 0;
-  let startY = 0;
-  let lastX = 0;
-  let dragging = false;
-  let gestureTarget = null;
-  let startOpen = false;
-  let pointerId = null;
-
-  const isMobile = () => mobileQuery.matches;
-  const isOpen = () => sidebar.classList.contains('open');
-
-  function setMenu(open) {
-    if (!isMobile()) {
-      backdrop.classList.remove('visible');
-      return;
-    }
-
-    sidebar.classList.toggle('open', open);
-    backdrop.classList.toggle('visible', open);
-    backdrop.setAttribute('aria-hidden', String(!open));
-
-    sidebar.style.removeProperty('transform');
-    sidebar.classList.remove('dragging');
-
-    const toggle = document.querySelector('.menu-toggle');
-    if (toggle) {
-      toggle.setAttribute('aria-expanded', String(open));
-    }
-  }
-
-  function renderDrag(x) {
-    const width = sidebar.getBoundingClientRect().width;
-    if (!width) return;
-
-    const delta = x - startX;
-    let offset;
-
-    if (startOpen) {
-      offset = Math.max(-width, Math.min(0, delta));
-    } else {
-      offset = Math.max(-width, Math.min(0, -width + delta));
-    }
-
-    sidebar.style.transform = `translateX(${offset}px)`;
-    backdrop.style.opacity = String(
-      Math.max(0, Math.min(1, (offset + width) / width))
-    );
-  }
-
-  function beginGesture(event) {
-    if (!isMobile() || event.button > 0) return;
-
-    const x = event.clientX;
-    const y = event.clientY;
-    const open = isOpen();
-    const onSidebar = sidebar.contains(event.target);
-    const fromLeftEdge = x <= EDGE_SIZE;
-
-    // Start only at the left edge or inside an open sidebar.
-    if (!onSidebar && !(fromLeftEdge && !open)) return;
-
-    // Don't interfere with horizontal controls such as sliders.
-    if (
-      event.target.closest(
-        'input, textarea, select, button, a, [data-no-sidebar-swipe]'
-      )
-    ) return;
-
-    startX = lastX = x;
-    startY = y;
-    startOpen = open;
-    dragging = false;
-    gestureTarget = event.target;
-    pointerId = event.pointerId;
-  }
-
-  function moveGesture(event) {
-    if (pointerId === null || event.pointerId !== pointerId) return;
-    if (!isMobile()) return;
-
-    const dx = event.clientX - startX;
-    const dy = event.clientY - startY;
-    lastX = event.clientX;
-
-    if (!dragging) {
-      // Let vertical scrolling work normally.
-      if (Math.abs(dy) > Math.abs(dx) || Math.abs(dx) < 8) return;
-
-      dragging = true;
-      sidebar.classList.add('dragging');
-
-      if (!startOpen) {
-        sidebar.classList.add('open');
-        backdrop.classList.add('visible');
-      }
-    }
-
-    if (event.cancelable) event.preventDefault();
-    renderDrag(event.clientX);
-  }
-
-  function endGesture(event) {
-    if (pointerId === null || event.pointerId !== pointerId) return;
-
-    const wasDragging = dragging;
-    const dx = lastX - startX;
-
-    pointerId = null;
-    dragging = false;
-
-    if (!wasDragging) return;
-
-    const shouldOpen = startOpen
-      ? dx > -CLOSE_THRESHOLD
-      : dx > OPEN_THRESHOLD;
-
-    setMenu(shouldOpen);
-  }
-
-  // Pointer events support mouse, touch and stylus.
-  document.addEventListener('pointerdown', beginGesture, {
-    passive: true
-  });
-
-  document.addEventListener('pointermove', moveGesture, {
-    passive: false
-  });
-
-  document.addEventListener('pointerup', endGesture, {
-    passive: true
-  });
-
-  document.addEventListener('pointercancel', endGesture, {
-    passive: true
-  });
-
-  // Tapping the backdrop closes the menu.
-  backdrop.addEventListener('click', () => setMenu(false));
-
-  // Support the existing hamburger/menu button.
-  document.addEventListener('click', event => {
-    const toggle = event.target.closest('.menu-toggle');
-    if (!toggle || !isMobile()) return;
-
-    event.preventDefault();
-    setMenu(!isOpen());
-  });
-
-  // Close with Escape.
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && isOpen()) {
-      setMenu(false);
-    }
-  });
-
-  // Close after selecting a navigation item.
-  sidebar.addEventListener('click', event => {
-    const link = event.target.closest('a, button');
-    if (link && isMobile()) {
-      setMenu(false);
-    }
-  });
-
-  // Reset mobile-only styles when switching to desktop.
-  function handleResize() {
-    if (!isMobile()) {
-      sidebar.classList.remove('open', 'dragging');
-      sidebar.style.removeProperty('transform');
-      backdrop.classList.remove('visible');
-      backdrop.style.removeProperty('opacity');
-      backdrop.setAttribute('aria-hidden', 'true');
-    }
-  }
-
-  mobileQuery.addEventListener?.('change', handleResize);
-  handleResize();
-})();
 </script>
 </body>
 </html>
