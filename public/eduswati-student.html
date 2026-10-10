@@ -3813,6 +3813,41 @@ function loadDashboardStudyWidgets() {
     if (tests) tests.innerHTML = '<div class="dashboard-empty">Your timetable could not be loaded right now. You can still open Timetables & Calendar to try again.</div>';
     if (plans) plans.innerHTML = '<div class="dashboard-empty">Your study plan could not be loaded right now. Please try again shortly.</div>';
   });
+
+  // ─── DOWNLOAD PDF ─────────────────────────────────────────────────────────────
+  
+async function downloadEbook(ebookId) {
+  try {
+    const response = await fetch(
+      `/api/student/ebooks/download?id=${encodeURIComponent(ebookId)}`,
+      {
+        method: 'GET',
+        credentials: 'same-origin'
+      }
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(
+        result.error || 'Unable to download this resource.'
+      )
+    }
+
+    if (!result.url) {
+      throw new Error('The download link was not returned.')
+    }
+
+    window.location.assign(result.url)
+  } catch (error) {
+    console.error('Download failed:', error)
+    alert(
+      error instanceof Error
+        ? error.message
+        : 'Unable to download this resource.'
+    )
+  }
+}
 }
 
 window.addEventListener('load', () => {
