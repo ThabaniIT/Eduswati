@@ -214,37 +214,104 @@ export async function PATCH(request: Request) {
   }
 
   // 1. Update the authenticated student's password in Supabase Auth.
-  if (Object.prototype.hasOwnProperty.call(body, 'password')) {
-    const password = body.password
+  
+if (Object.prototype.hasOwnProperty.call(body, 'password')) {
+  const currentPassword =
+    typeof body.current_password === 'string'
+      ? body.current_password
+      : ''
 
-    if (
-      typeof password !== 'string' ||
-      password.length < 6 ||
-      password.length > 128
-    ) {
-      return NextResponse.json(
-        { error: 'Password must be between 6 and 128 characters.' },
-        { status: 400 }
-      )
-    }
+  const newPassword =
+    typeof body.password === 'string'
+      ? body.password
+      : ''
 
-    const { error } = await supabase.auth.updateUser({ password })
-
-    if (error) {
-      console.error('Student password update failed:', error.message)
-
-      return NextResponse.json(
-        { error: 'Password could not be updated. Please try again.' },
-        { status: 400 }
-      )
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'Password updated successfully.',
-    })
+  if (!currentPassword) {
+    return NextResponse.json(
+      { error: 'Enter your current password.' },
+      { status: 400 }
+    )
   }
 
+  if (newPassword.length < 6 || newPassword.length > 128) {
+    return NextResponse.json(
+      { error: 'The new password must contain 6–128 characters.' },
+      { status: 400 }
+    )
+  }
+
+  if (currentPassword === newPassword) {
+    return NextResponse.json(
+      { error: 'Choose a different password from your current one.' },
+      { status: 400 }
+    )
+  }
+
+  if (!user.email) {
+    return NextResponse.json(
+      { error: 'Your account email could not be verified.' },
+      { status: 400 }
+    )
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Supabase public environment variables are missing.')
+
+    return NextResponse.json(
+      { error: 'Password verification is temporarily unavailable.' },
+      { status: 500 }
+    )
+  }
+
+  // Use an isolated client to verify the current password.
+  const authVerifier = createAuthClient(
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    }
+  )
+
+  const { error: verificationError } =
+    await authVerifier.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword
+    })
+
+  if (verificationError) {
+    return NextResponse.json(
+      { error: 'Your current password is incorrect.' },
+      { status: 401 }
+    )
+  }
+
+  // Only update the password after verification succeeds.
+  const { error: updateError } =
+    await supabase.auth.updateUser({
+      password: newPassword
+    })
+
+  if (updateError) {
+    console.error('Password update failed:', updateError.message)
+
+    return NextResponse.json(
+      { error: 'Your password could not be updated. Please try again.' },
+      { status: 400 }
+    )
+  }
+
+  return NextResponse.json({
+    success: true,
+    message: 'Password changed successfully.'
+  })
+}
   // 2. Save notification preferences in the users JSONB column.
   if (
     Object.prototype.hasOwnProperty.call(
