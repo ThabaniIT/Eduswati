@@ -1,14 +1,13 @@
-// app/api/student/me/route.ts
-// Returns the logged-in student's profile, subscription, and stats
 
 import { createClient as createAuthClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+// GET /api/student/me
+// Returns the authenticated student's profile, subscription, and stats.
 export async function GET() {
   const supabase = await createClient()
 
-  // Verify authentication
   const {
     data: { user },
     error: authError,
@@ -21,8 +20,6 @@ export async function GET() {
     )
   }
 
-  // Get the student's profile.
-  // The actual EduSwati table is "users", not "profiles".
   const {
     data: profile,
     error: profileError,
@@ -36,24 +33,19 @@ export async function GET() {
     console.error('Student profile query error:', profileError)
 
     return NextResponse.json(
-      {
-        error: profileError?.message ?? 'Student profile not found',
-      },
-      { status: 500 }
+      { error: 'Student profile not found.' },
+      { status: 404 }
     )
   }
 
-  // Block admins from using the student API
   if (profile.role !== 'student') {
     return NextResponse.json(
-      { error: 'Forbidden' },
+      { error: 'Forbidden.' },
       { status: 403 }
     )
   }
 
-  // Get the student's active subscription.
-  // The subscription table uses student_id.
-  // The plan relationship uses subscription_plans.
+  // Active subscription
   const {
     data: subscription,
     error: subscriptionError,
@@ -70,10 +62,7 @@ export async function GET() {
     .maybeSingle()
 
   if (subscriptionError) {
-    console.error(
-      'Student subscription query error:',
-      subscriptionError
-    )
+    console.error('Student subscription query error:', subscriptionError)
   }
 
   // Study session totals
@@ -86,10 +75,7 @@ export async function GET() {
     .eq('student_id', user.id)
 
   if (sessionsError) {
-    console.error(
-      'Study sessions query error:',
-      sessionsError
-    )
+    console.error('Study sessions query error:', sessionsError)
   }
 
   const totalHours =
@@ -98,7 +84,7 @@ export async function GET() {
       0
     ) ?? 0
 
-  // Completed resources
+  // Completed learning resources
   const {
     count: progressCount,
     error: progressError,
@@ -112,10 +98,7 @@ export async function GET() {
     .eq('status', 'completed')
 
   if (progressError) {
-    console.error(
-      'Progress query error:',
-      progressError
-    )
+    console.error('Progress query error:', progressError)
   }
 
   // Recent quiz results
@@ -126,16 +109,11 @@ export async function GET() {
     .from('quiz_results')
     .select('*')
     .eq('student_id', user.id)
-    .order('taken_at', {
-      ascending: false,
-    })
+    .order('taken_at', { ascending: false })
     .limit(10)
 
   if (quizError) {
-    console.error(
-      'Quiz results query error:',
-      quizError
-    )
+    console.error('Quiz results query error:', quizError)
   }
 
   const avgScore =
@@ -149,7 +127,11 @@ export async function GET() {
       : 0
 
   return NextResponse.json({
-    profile,
+    profile: {
+      ...profile,
+      // Supabase Auth is the source of truth for the email.
+      email: user.email ?? profile.email ?? '',
+    },
     subscription: subscription ?? null,
     stats: {
       totalHours: Math.round(totalHours),
@@ -161,11 +143,8 @@ export async function GET() {
   })
 }
 
-/**
- * PATCH /api/student/me
- * Updates the authenticated student's personal information,
- * password, or notification preferences.
- */
+// PATCH /api/student/me
+// Updates the authenticated student's password, profile, or notifications.
 export async function PATCH(request: Request) {
   const supabase = await createClient()
 
@@ -181,21 +160,24 @@ export async function PATCH(request: Request) {
     )
   }
 
-  // Only students may use this endpoint.
-  const { data: profile, error: profileError } = await supabase
+  // Only a student can use this endpoint.
+  const {
+    data: account,
+    error: accountError,
+  } = await supabase
     .from('users')
     .select('id, role')
     .eq('id', user.id)
     .single()
 
-  if (profileError || !profile) {
+  if (accountError || !account) {
     return NextResponse.json(
       { error: 'Student account not found.' },
       { status: 404 }
     )
   }
 
-  if (profile.role !== 'student') {
+  if (account.role !== 'student') {
     return NextResponse.json(
       { error: 'Forbidden.' },
       { status: 403 }
@@ -205,7 +187,20 @@ export async function PATCH(request: Request) {
   let body: Record<string, unknown>
 
   try {
-    body = await request.json()
+    const parsedBody: unknown = await request.json()
+
+    if (
+      !parsedBody ||
+      typeof parsedBody !== 'object' ||
+      Array.isArray(parsedBody)
+    ) {
+      return NextResponse.json(
+        { error: 'Request body must be a JSON object.' },
+        { status: 400 }
+      )
+    }
+
+    body = parsedBody as Record<string, unknown>
   } catch {
     return NextResponse.json(
       { error: 'Invalid request data.' },
@@ -213,106 +208,119 @@ export async function PATCH(request: Request) {
     )
   }
 
-  // 1. Update the authenticated student's password in Supabase Auth.
-  
-if (Object.prototype.hasOwnProperty.call(body, 'password')) {
-  const currentPassword =
-    typeof body.current_password === 'string'
-      ? body.current_password
-      : ''
+  // --------------------------------------------------
+  // 1. PASSWORD CHANGE
+  // Verify the current password before changing it.
+  // --------------------------------------------------
+  if (Object.prototype.hasOwnProperty.call(body, 'password')) {
+    const currentPassword =
+      typeof body.current_password === 'string'
+        ? body.current_password
+        : ''
 
-  const newPassword =
-    typeof body.password === 'string'
-      ? body.password
-      : ''
+    const newPassword =
+      typeof body.password === 'string'
+        ? body.password
+        : ''
 
-  if (!currentPassword) {
-    return NextResponse.json(
-      { error: 'Enter your current password.' },
-      { status: 400 }
-    )
-  }
-
-  if (newPassword.length < 6 || newPassword.length > 128) {
-    return NextResponse.json(
-      { error: 'The new password must contain 6–128 characters.' },
-      { status: 400 }
-    )
-  }
-
-  if (currentPassword === newPassword) {
-    return NextResponse.json(
-      { error: 'Choose a different password from your current one.' },
-      { status: 400 }
-    )
-  }
-
-  if (!user.email) {
-    return NextResponse.json(
-      { error: 'Your account email could not be verified.' },
-      { status: 400 }
-    )
-  }
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Supabase public environment variables are missing.')
-
-    return NextResponse.json(
-      { error: 'Password verification is temporarily unavailable.' },
-      { status: 500 }
-    )
-  }
-
-  // Use an isolated client to verify the current password.
-  const authVerifier = createAuthClient(
-    supabaseUrl,
-    supabaseAnonKey,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false
-      }
+    if (!currentPassword) {
+      return NextResponse.json(
+        { error: 'Enter your current password.' },
+        { status: 400 }
+      )
     }
-  )
 
-  const { error: verificationError } =
-    await authVerifier.auth.signInWithPassword({
+    if (newPassword.length < 6 || newPassword.length > 128) {
+      return NextResponse.json(
+        { error: 'The new password must contain 6–128 characters.' },
+        { status: 400 }
+      )
+    }
+
+    if (currentPassword === newPassword) {
+      return NextResponse.json(
+        { error: 'Choose a different password.' },
+        { status: 400 }
+      )
+    }
+
+    if (!user.email) {
+      return NextResponse.json(
+        { error: 'Your account email could not be verified.' },
+        { status: 400 }
+      )
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Supabase public environment variables are missing.')
+
+      return NextResponse.json(
+        { error: 'Password verification is temporarily unavailable.' },
+        { status: 500 }
+      )
+    }
+
+    // Use a separate client so credential verification does not replace
+    // the student's existing authenticated session.
+    const verifier = createAuthClient(
+      supabaseUrl,
+      supabaseAnonKey,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      }
+    )
+
+    const {
+      data: verification,
+      error: verificationError,
+    } = await verifier.auth.signInWithPassword({
       email: user.email,
-      password: currentPassword
+      password: currentPassword,
     })
 
-  if (verificationError) {
-    return NextResponse.json(
-      { error: 'Your current password is incorrect.' },
-      { status: 401 }
-    )
-  }
+    if (verificationError || !verification.user) {
+      return NextResponse.json(
+        { error: 'Your current password is incorrect.' },
+        { status: 401 }
+      )
+    }
 
-  // Only update the password after verification succeeds.
-  const { error: updateError } =
-    await supabase.auth.updateUser({
-      password: newPassword
+    // Change the password only after successful verification.
+    const {
+      data: updatedAuth,
+      error: passwordUpdateError,
+    } = await supabase.auth.updateUser({
+      password: newPassword,
     })
 
-  if (updateError) {
-    console.error('Password update failed:', updateError.message)
+    if (passwordUpdateError || !updatedAuth.user) {
+      console.error(
+        'Password update failed:',
+        passwordUpdateError?.message
+      )
 
-    return NextResponse.json(
-      { error: 'Your password could not be updated. Please try again.' },
-      { status: 400 }
-    )
+      return NextResponse.json(
+        { error: 'Your password could not be updated. Please try again.' },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Password changed successfully.',
+    })
   }
 
-  return NextResponse.json({
-    success: true,
-    message: 'Password changed successfully.'
-  })
-}
-  // 2. Save notification preferences in the users JSONB column.
+  // --------------------------------------------------
+  // 2. NOTIFICATION PREFERENCES
+  // --------------------------------------------------
   if (
     Object.prototype.hasOwnProperty.call(
       body,
@@ -333,16 +341,18 @@ if (Object.prototype.hasOwnProperty.call(body, 'password')) {
     }
 
     const supplied = preferences as Record<string, unknown>
+
     const allowedKeys = [
       'subscription_reminders',
       'weekly_progress_report',
       'new_content_alerts',
     ]
 
+    const suppliedKeys = Object.keys(supplied)
+
     if (
-      Object.keys(supplied).some(
-        key => !allowedKeys.includes(key)
-      ) ||
+      suppliedKeys.length === 0 ||
+      suppliedKeys.some(key => !allowedKeys.includes(key)) ||
       Object.values(supplied).some(
         value => typeof value !== 'boolean'
       )
@@ -353,26 +363,45 @@ if (Object.prototype.hasOwnProperty.call(body, 'password')) {
       )
     }
 
-    // Preserve any other existing preference keys.
-    const { data: current, error: currentError } = await supabase
+    const {
+      data: current,
+      error: currentError,
+    } = await supabase
       .from('users')
       .select('notification_preferences')
       .eq('id', user.id)
       .single()
 
-    if (currentError) {
+    if (currentError || !current) {
+      console.error(
+        'Could not load notification preferences:',
+        currentError
+      )
+
       return NextResponse.json(
         { error: 'Could not load existing preferences.' },
         { status: 500 }
       )
     }
 
+    const currentValue: unknown = current.notification_preferences
+
+    const existingPreferences =
+      currentValue &&
+      typeof currentValue === 'object' &&
+      !Array.isArray(currentValue)
+        ? currentValue as Record<string, unknown>
+        : {}
+
     const mergedPreferences = {
-      ...(current.notification_preferences || {}),
+      ...existingPreferences,
       ...supplied,
     }
 
-    const { data: updated, error } = await supabase
+    const {
+      data: updated,
+      error: preferenceUpdateError,
+    } = await supabase
       .from('users')
       .update({
         notification_preferences: mergedPreferences,
@@ -382,8 +411,11 @@ if (Object.prototype.hasOwnProperty.call(body, 'password')) {
       .select('notification_preferences')
       .single()
 
-    if (error) {
-      console.error('Notification preference update failed:', error)
+    if (preferenceUpdateError || !updated) {
+      console.error(
+        'Notification preference update failed:',
+        preferenceUpdateError
+      )
 
       return NextResponse.json(
         { error: 'Could not save notification preferences.' },
@@ -398,7 +430,9 @@ if (Object.prototype.hasOwnProperty.call(body, 'password')) {
     })
   }
 
-  // 3. Update permitted personal information only.
+  // --------------------------------------------------
+  // 3. PERSONAL INFORMATION
+  // --------------------------------------------------
   const updates: Record<string, unknown> = {}
 
   if (Object.prototype.hasOwnProperty.call(body, 'full_name')) {
@@ -421,7 +455,12 @@ if (Object.prototype.hasOwnProperty.call(body, 'password')) {
 
     if (
       grade !== null &&
-      (!Number.isInteger(grade) || Number(grade) < 8 || Number(grade) > 12)
+      (
+        typeof grade !== 'number' ||
+        !Number.isInteger(grade) ||
+        grade < 8 ||
+        grade > 12
+      )
     ) {
       return NextResponse.json(
         { error: 'Grade must be between 8 and 12.' },
@@ -441,15 +480,21 @@ if (Object.prototype.hasOwnProperty.call(body, 'password')) {
 
   updates.updated_at = new Date().toISOString()
 
-  const { data: updatedProfile, error } = await supabase
+  const {
+    data: updatedProfile,
+    error: profileUpdateError,
+  } = await supabase
     .from('users')
     .update(updates)
     .eq('id', user.id)
     .select('*')
     .single()
 
-  if (error) {
-    console.error('Student profile update failed:', error)
+  if (profileUpdateError || !updatedProfile) {
+    console.error(
+      'Student profile update failed:',
+      profileUpdateError
+    )
 
     return NextResponse.json(
       { error: 'Could not save your profile changes.' },
@@ -461,8 +506,7 @@ if (Object.prototype.hasOwnProperty.call(body, 'password')) {
     success: true,
     profile: {
       ...updatedProfile,
-      // The authenticated account is the source of truth for email.
-      email: user.email,
+      email: user.email ?? updatedProfile.email ?? '',
     },
     message: 'Profile updated successfully.',
   })
