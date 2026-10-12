@@ -2045,40 +2045,48 @@ window.addEventListener('load', function() {
 
 // ─── APPLY PROFILE DATA ───────────────────────────────────────────────────────
 function applyProfile() {
-  const p = APP.profile;
-  if (!p) return;
-  const initials = getInitials(p.full_name);
-  // Sidebar
-  setEl('sidebar-avatar', initials);
-  setEl('sidebar-name', p.full_name);
-  setEl('sidebar-role', p.grade ? 'Grade ' + p.grade + ' · Student' : 'Student');
-  // Topbar
-  setEl('topbar-avatar', initials);
-  // Profile page avatar card
-  setEl('profile-avatar-large', initials);
-  setEl('profile-display-name', p.full_name);
-  setEl('profile-grade-tag', p.grade ? 'Grade ' + p.grade : 'Student');
-  setEl('profile-email-display', APP.profile._email || '—');
-  setEl('profile-grade-display', p.grade ? 'Grade ' + p.grade : '—');
-  setEl('profile-joined', p.created_at ? new Date(p.created_at).toLocaleDateString('en-ZA', { year:'numeric', month:'long' }) : '—');
-  // Form inputs
-  const names = p.full_name ? p.full_name.split(' ') : [];
-  setVal('input-first-name', names[0] || '');
-  setVal('input-last-name', names.slice(1).join(' '));
-  setVal('input-email', APP.profile._email || '');
-  setVal('input-grade', p.grade ? String(p.grade) : '');
-  // Dashboard welcome
-  const greeting = document.getElementById('page-sub');
-  if (greeting) greeting.textContent = 'Welcome back, ' + (names[0] || p.full_name) + ' 👋';
-  // Chat bot greeting uses first name
-  const botGreet = document.querySelector('#chat-messages .msg-bubble');
-  if (botGreet && names[0]) {
-    botGreet.innerHTML = '👋 Hi ' + names[0] + '! I\'m EduBot, your AI homework assistant powered by Claude.<br><br>I have access to your <strong>eBook library</strong> — ask me anything from your Mathematics, Science, English, Biology, or History textbooks!';
-  }
-  const userAvatar = document.querySelector('.user-msg-avatar');
-  if (userAvatar) userAvatar.textContent = initials;
-}
+  const p = APP.profile || {};
+  const fullName = (p.full_name || '').trim();
+  const nameParts = fullName.split(/\s+/).filter(Boolean);
+  const firstName = nameParts.shift() || '';
+  const lastName = nameParts.join(' ');
 
+  const setValue = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value ?? '';
+  };
+
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value ?? '';
+  };
+
+  setValue('input-first-name', firstName);
+  setValue('input-last-name', lastName);
+  setValue('input-email', p.email || p._email || '');
+  setValue('input-grade', p.grade || '');
+  setValue('input-phone', p.phone_number || '');
+
+  setText('profile-display-name', fullName || 'Student');
+  setText('profile-email-display', p.email || p._email || 'Email unavailable');
+  setText('profile-grade-display', p.grade ? `Grade ${p.grade}` : 'Grade not set');
+  setText('profile-grade-tag', p.grade ? `Grade ${p.grade}` : 'Student');
+
+  const avatar = document.getElementById('profile-avatar-large');
+  if (avatar) {
+    avatar.textContent = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'S';
+  }
+
+  const joined = document.getElementById('profile-joined');
+  if (joined) {
+    joined.textContent = p.created_at
+      ? `Member since ${new Date(p.created_at).toLocaleDateString(undefined, {
+          month: 'long',
+          year: 'numeric'
+        })}`
+      : '';
+  }
+}
 // ─── APPLY SUBSCRIPTION DATA ──────────────────────────────────────────────────
 function applySubscription() {
   const sub = APP.subscription;
@@ -2331,57 +2339,119 @@ function updateStepUI(active) {
 
 // ─── PROFILE SAVE ─────────────────────────────────────────────────────────────
 async function saveProfile() {
-  const firstName = document.getElementById('input-first-name').value.trim();
-  const lastName = document.getElementById('input-last-name').value.trim();
-  const grade = document.getElementById('input-grade').value;
-  if (!firstName) { showProfileAlert('Please enter your first name.', 'error'); return; }
-  const fullName = [firstName, lastName].filter(Boolean).join(' ');
-  const btn = document.getElementById('btn-save-profile');
-  btn.disabled = true; btn.textContent = 'Saving…';
+  const firstName = document.getElementById('input-first-name')?.value.trim() || '';
+  const lastName = document.getElementById('input-last-name')?.value.trim() || '';
+  const gradeValue = document.getElementById('input-grade')?.value;
+  const fullName = `${firstName} ${lastName}`.trim();
+
+  if (fullName.length < 2) {
+    showToast('Please enter your name.', 'error');
+    return;
+  }
+
+  const grade = gradeValue === '' ? null : Number(gradeValue);
+
+  if (grade !== null && (!Number.isInteger(grade) || grade < 8 || grade > 12)) {
+    showToast('Please select a valid grade (8–12).', 'error');
+    return;
+  }
+
+  const button = document.getElementById('btn-save-profile');
+  if (button) button.disabled = true;
+
   try {
-    const res = await fetch('/api/student/me', {
+    const response = await fetch('/api/student/me', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ full_name: fullName, grade: grade ? parseInt(grade) : null }),
+      credentials: 'same-origin',
+      body: JSON.stringify({ full_name: fullName, grade })
     });
-    const data = await res.json();
-    btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
-    if (!res.ok) { showProfileAlert(data.error || 'Save failed.', 'error'); return; }
-    if (APP.profile) { APP.profile.full_name = fullName; APP.profile.grade = grade ? parseInt(grade) : null; }
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || result.message || 'Could not save your profile.');
+    }
+
+    const updatedProfile = result.profile || result.user;
+
+    if (updatedProfile) {
+      APP.profile = {
+        ...APP.profile,
+        ...updatedProfile,
+        email: updatedProfile.email || APP.profile?.email || APP.profile?._email
+      };
+    } else {
+      APP.profile = { ...APP.profile, full_name: fullName, grade };
+    }
+
     applyProfile();
-    showProfileAlert('Profile updated successfully!', 'success');
-    showToast('Profile saved!', 'success');
-  } catch(e) {
-    btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
-    showProfileAlert('Network error. Please try again.', 'error');
+    showToast('Profile updated successfully!', 'success');
+  } catch (error) {
+    console.error('Profile update failed:', error);
+    showToast(error.message || 'Could not save your profile.', 'error');
+  } finally {
+    if (button) button.disabled = false;
   }
 }
 
 // ─── CHANGE PASSWORD ──────────────────────────────────────────────────────────
 async function changePassword() {
-  const newPw = document.getElementById('input-new-pw').value;
-  const confPw = document.getElementById('input-confirm-pw').value;
-  if (!newPw || newPw.length < 6) { showProfileAlert('Password must be at least 6 characters.', 'error'); return; }
-  if (newPw !== confPw) { showProfileAlert('New passwords do not match.', 'error'); return; }
-  const btn = document.getElementById('btn-change-pw');
-  btn.disabled = true; btn.textContent = 'Updating…';
+  const currentPw = document.getElementById('input-current-pw')?.value || '';
+  const newPw = document.getElementById('input-new-pw')?.value || '';
+  const confirmPw = document.getElementById('input-confirm-pw')?.value || '';
+
+  if (!currentPw) {
+    showToast('Enter your current password.', 'error');
+    return;
+  }
+
+  if (newPw.length < 6) {
+    showToast('Your new password must contain at least 6 characters.', 'error');
+    return;
+  }
+
+  if (newPw !== confirmPw) {
+    showToast('The new passwords do not match.', 'error');
+    return;
+  }
+
+  if (currentPw === newPw) {
+    showToast('Choose a different password from your current one.', 'error');
+    return;
+  }
+
+  const button = document.getElementById('btn-change-pw');
+  if (button) button.disabled = true;
+
   try {
-    const res = await fetch('/api/student/me', {
+    const response = await fetch('/api/student/me', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: newPw }),
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        current_password: currentPw,
+        password: newPw
+      })
     });
-    const data = await res.json();
-    btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Update Password';
-    if (!res.ok) { showProfileAlert(data.error || 'Password update failed.', 'error'); return; }
-    showProfileAlert('Password updated! You will need to sign in again on other devices.', 'success');
-    showToast('Password changed successfully.', 'success');
-    document.getElementById('input-current-pw').value = '';
-    document.getElementById('input-new-pw').value = '';
-    document.getElementById('input-confirm-pw').value = '';
-  } catch(e) {
-    btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Update Password';
-    showProfileAlert('Network error. Please try again.', 'error');
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || result.message || 'Could not change your password.');
+    }
+
+    ['input-current-pw', 'input-new-pw', 'input-confirm-pw'].forEach(id => {
+      const field = document.getElementById(id);
+      if (field) field.value = '';
+    });
+
+    showToast('Password changed successfully!', 'success');
+  } catch (error) {
+    console.error('Password change failed:', error);
+    showToast(error.message || 'Could not change your password.', 'error');
+  } finally {
+    if (button) button.disabled = false;
   }
 }
 
