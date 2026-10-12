@@ -1,6 +1,7 @@
 // app/api/student/me/route.ts
 // Returns the logged-in student's profile, subscription, and stats
 
+import { createClient as createAuthClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
