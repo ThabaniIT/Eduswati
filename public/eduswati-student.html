@@ -2024,23 +2024,46 @@ window.addEventListener('message', function(e) {
 
 // Fallback: if running standalone (not in iframe), try fetching from API
 window.addEventListener('load', function() {
-  setTimeout(function() {
-    if (!APP.profile) {
-      fetch('/api/student/me')
-        .then(r => r.json())
-        .then(data => {
-          if (data.profile) {
-            APP.profile = data.profile;
-            APP.subscription = data.subscription;
-            applyProfile();
-            applySubscription();
-          }
-        })
-        .catch(() => {});
+  setTimeout(async function() {
+    // An empty profile object should not block the API fallback.
+    if (!APP.profile?.full_name) {
+      try {
+        const response = await fetch('/api/student/me', {
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || `Profile request failed (${response.status}).`
+          );
+        }
+
+        if (data.profile) {
+          APP.profile = {
+            ...APP.profile,
+            ...data.profile,
+            email: data.profile.email || data.profile._email || ''
+          };
+
+          APP.subscription = data.subscription ?? APP.subscription;
+
+          applyProfile();
+          applySubscription();
+          updateDashboardIdentity();
+        } else {
+          throw new Error('The API did not return a student profile.');
+        }
+      } catch (error) {
+        console.error('EduSwati profile loading failed:', error);
+      }
     }
+
+    fetchPlans();
+    fetchPaymentHistory();
   }, 800);
-  fetchPlans();
-  fetchPaymentHistory();
 });
 
 // ─── APPLY PROFILE DATA ───────────────────────────────────────────────────────
@@ -2073,9 +2096,10 @@ function applyProfile() {
   setText('profile-grade-tag', p.grade ? `Grade ${p.grade}` : 'Student');
 
   const avatar = document.getElementById('profile-avatar-large');
-  if (avatar) {
-    avatar.textContent = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'S';
-  }
+
+if (avatar) {
+  avatar.textContent = getInitials(fullName);
+}
 
   const joined = document.getElementById('profile-joined');
   if (joined) {
@@ -2515,9 +2539,21 @@ function doLogout() {
 function setEl(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
 function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
 function getInitials(name) {
-  if (!name) return '?';
-  const parts = name.trim().split(' ').filter(Boolean);
-  return (parts[0]?.[0] || '') + (parts[1]?.[0] || '').toUpperCase();
+  const parts = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (!parts.length) return '?';
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return (
+    parts[0].charAt(0) +
+    parts[parts.length - 1].charAt(0)
+  ).toUpperCase();
 }
 function fmtDate(str) {
   return new Date(str).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' });
@@ -2744,7 +2780,7 @@ function showPage(id, btn) {
   if (btn) { btn.classList.add('active'); closeSidebar(); }
 
   const titles = {
-    dashboard:    ['Dashboard', APP.profile ? 'Welcome back, ' + APP.profile.full_name.split(' ')[0] + ' 👋' : 'Welcome back 👋'],
+    dashboard:    ['Dashboard', 'Welcome back 👋'],
     progress:     ['My Progress', 'Track your academic performance'],
     library:      ['eBook Library', 'Browse and read your textbooks'],
     videos:       ['Video Lessons', 'Watch curriculum-aligned lessons'],
@@ -4021,6 +4057,16 @@ function updateDashboardIdentity() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const fullName = APP.profile?.full_name || '';
   const firstName = fullName.trim().split(/\s+/)[0];
+  const pageSub = document.getElementById('page-sub');
+
+if (
+  pageSub &&
+  document.getElementById('page-dashboard')?.classList.contains('active')
+) {
+  pageSub.textContent = firstName
+    ? `Welcome back, ${firstName} 👋`
+    : 'Welcome back 👋';
+}
   const grade = APP.profile?.grade ? `Grade ${APP.profile.grade}` : 'your learning journey';
   const dateEl = document.getElementById('dashboard-date');
   const greetingEl = document.getElementById('dashboard-greeting');
