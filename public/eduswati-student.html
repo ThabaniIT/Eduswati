@@ -1612,7 +1612,7 @@ body {
                     </div>
                   </label>
                 </div>
-                <button class="btn-primary" style="margin-top:20px" onclick="showToast('Notification preferences saved!', 'success')">
+                <button class="btn-primary" style="margin-top:20px" onclick="saveNotificationPreferences()">
                   <i class="fas fa-save"></i> Save Preferences
                 </button>
               </div>
@@ -2390,6 +2390,51 @@ async function saveProfile() {
   } catch (error) {
     console.error('Profile update failed:', error);
     showToast(error.message || 'Could not save your profile.', 'error');
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+// ─── SAVE NOTIFICATIONS ──────────────────────────────────────────────────────────
+async function saveNotificationPreferences() {
+  const button = document.getElementById('btn-save-notifications');
+
+  const preferences = {
+    subscription_reminders: !!document.getElementById('notif-sub')?.checked,
+    weekly_progress_report: !!document.getElementById('notif-progress')?.checked,
+    new_content_alerts: !!document.getElementById('notif-new-content')?.checked
+  };
+
+  if (button) button.disabled = true;
+
+  try {
+    const response = await fetch('/api/student/me', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        notification_preferences: preferences
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || result.message || 'Could not save notification preferences.');
+    }
+
+    APP.profile = {
+      ...APP.profile,
+      notification_preferences:
+        result.notification_preferences ||
+        result.profile?.notification_preferences ||
+        preferences
+    };
+
+    showToast('Notification preferences saved!', 'success');
+  } catch (error) {
+    console.error('Notification preferences update failed:', error);
+    showToast(error.message || 'Could not save notification preferences.', 'error');
   } finally {
     if (button) button.disabled = false;
   }
