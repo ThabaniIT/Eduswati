@@ -940,6 +940,148 @@ body {
   }
 }
 
+
+/* EduSwati eBook reader */
+.ebook-reader-modal[hidden] {
+  display: none !important;
+}
+
+.ebook-reader-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(10, 20, 40, 0.78);
+}
+
+.ebook-reader-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(1100px, 100%);
+  height: min(90vh, 900px);
+  min-height: 300px;
+  overflow: hidden;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.ebook-reader-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border, #ddd);
+}
+
+.ebook-reader-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: var(--text, #172033);
+}
+
+.ebook-reader-heading strong {
+  overflow-wrap: anywhere;
+}
+
+.ebook-reader-heading span {
+  font-size: 12px;
+  color: var(--text-muted, #687386);
+}
+
+.ebook-reader-close {
+  flex-shrink: 0;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--surface2, #eef2f7);
+  color: var(--text, #172033);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ebook-reader-content {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: #f3f5f8;
+}
+
+#ebook-reader-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+#ebook-reader-fallback {
+  padding: 16px;
+  color: #273449;
+  text-align: center;
+}
+
+.ebook-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ebook-card-actions button {
+  flex: 1 1 100px;
+  min-height: 38px;
+  padding: 9px 10px;
+  border: 1px solid var(--border, #d5dbe5);
+  border-radius: 8px;
+  background: var(--surface, #fff);
+  color: var(--text, #172033);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ebook-card-actions .ebook-read-button {
+  background: var(--primary, #234bc4);
+  border-color: var(--primary, #234bc4);
+  color: #fff;
+}
+
+.ebook-card-actions button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+@media (max-width: 600px) {
+  .ebook-reader-modal {
+    padding: 0;
+  }
+
+  .ebook-reader-panel {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
+  .ebook-reader-header {
+    padding: 12px;
+  }
+
+  .ebook-card-actions button {
+    flex-basis: 100%;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2867,6 +3009,7 @@ function escapeBookText(value) {
   }[ch]));
 }
 
+
 function renderBooks() {
   const grid = document.getElementById('ebook-grid');
   if (!grid) return;
@@ -2874,47 +3017,80 @@ function renderBooks() {
   const filtered = books.filter(b => {
     const subject = String(b.subject || 'General');
     const title = String(b.title || 'Untitled eBook');
-    const matchSub = activeSubject === 'All' || subject === activeSubject;
-    const matchSearch = title.toLowerCase().includes(searchText) || subject.toLowerCase().includes(searchText);
+
+    const matchSub =
+      activeSubject === 'All' || subject === activeSubject;
+
+    const matchSearch =
+      title.toLowerCase().includes(searchText) ||
+      subject.toLowerCase().includes(searchText);
+
     return matchSub && matchSearch;
   });
 
   const count = document.getElementById('book-count');
-  if (count) count.textContent = filtered.length + ' book' + (filtered.length !== 1 ? 's' : '');
+  if (count) {
+    count.textContent =
+      filtered.length + ' book' + (filtered.length !== 1 ? 's' : '');
+  }
 
   if (!filtered.length) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:28px;text-align:center;color:var(--text-muted)">No eBooks found for this filter yet.</div>';
+    grid.innerHTML =
+      '<div class="empty-state" style="grid-column:1/-1;padding:28px;text-align:center;color:var(--text-muted)">No eBooks found for this filter yet.</div>';
     return;
   }
 
-  grid.innerHTML = filtered.map((b, index) => {
+  grid.innerHTML = filtered.map(b => {
+    const id = escapeBookText(String(b.id || ''));
     const title = escapeBookText(b.title || 'Untitled eBook');
     const subject = escapeBookText(b.subject || 'General');
-    const grade = b.grade ? 'Grade ' + escapeBookText(b.grade) : 'All grades';
-    const pages = Number(b.pages) > 0 ? ' · ' + Number(b.pages) + ' pages' : '';
+    const grade = b.grade
+      ? 'Grade ' + escapeBookText(b.grade)
+      : 'All grades';
+    const pages = Number(b.pages) > 0
+      ? ' · ' + Number(b.pages) + ' pages'
+      : '';
     const emoji = escapeBookText(b.emoji || '📘');
-    const color = /^#[0-9a-f]{3,8}$/i.test(b.color || '') ? b.color : '#eef2ff';
+    const color = /^#[0-9a-f]{3,8}$/i.test(b.color || '')
+      ? b.color
+      : '#eef2ff';
+
     return `
-      <div class="ebook-card" role="button" tabindex="0" data-book-index="${index}" onclick="openBookFromCard(this)">
-        <div class="ebook-cover" style="background:${color}">${emoji}</div>
+      <article class="ebook-card" data-book-id="${id}">
+        <div class="ebook-cover" style="background:${color}">
+          ${emoji}
+        </div>
+
         <div class="ebook-info">
           <div class="ebook-subject">${subject}</div>
           <div class="ebook-title">${title}</div>
           <div class="ebook-grade">${grade}${pages}</div>
-        </div>
-      </div>`;
-  }).join('');
 
-  // Keep keyboard users able to open the same cards as mouse/touch users.
-  grid.querySelectorAll('.ebook-card').forEach(card => {
-    card.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        openBookFromCard(card);
-      }
-    });
-  });
+          <div class="ebook-card-actions">
+            <button
+              type="button"
+              class="ebook-read-button"
+              data-book-id="${id}"
+              onclick="openBookFromCard(this)"
+              aria-label="Read ${title} online"
+            >
+              Read online
+            </button>
+
+            <button
+              type="button"
+              data-book-id="${id}"
+              onclick="downloadBookFromCard(this)"
+              aria-label="Download ${title} PDF"
+            >
+              Download PDF
+            </button>
+          </div>
+        </div>
+      </article>`;
+  }).join('');
 }
+
 
 async function loadBooks() {
   const grid = document.getElementById('ebook-grid');
@@ -2953,24 +3129,56 @@ function filterBooks() {
   searchText = (document.getElementById('ebook-search')?.value || '').toLowerCase().trim();
   renderBooks();
 }
-function openBookFromCard(card) {
-  const index = Number(card?.dataset?.bookIndex);
-  const book = books[index];
+
+function openBookFromCard(button) {
+  const bookId = button?.dataset?.bookId;
+  const book = books.find(b => String(b.id) === String(bookId));
+
   if (book) openBook(book);
 }
-async function openBook(bookOrTitle) {
-  const book = typeof bookOrTitle === 'string'
-    ? books.find(b => b.title === bookOrTitle)
-    : bookOrTitle;
 
+function downloadBookFromCard(button) {
+  const bookId = button?.dataset?.bookId;
+  const book = books.find(b => String(b.id) === String(bookId));
+
+  if (book) downloadBook(book.id);
+}
+
+async function openBook(book) {
   if (!book || !book.id) {
     alert('This eBook could not be identified. Please refresh the library.');
     return;
   }
 
+  const modal = document.getElementById('ebook-reader-modal');
+  const frame = document.getElementById('ebook-reader-frame');
+  const heading = document.getElementById('ebook-reader-title');
+
+  if (!modal || !frame || !heading) {
+    alert('The eBook reader is not available. Please refresh the page.');
+    return;
+  }
+
+  const readButton = document.querySelector(
+    `.ebook-read-button[data-book-id="${CSS.escape(String(book.id))}"]`
+  );
+
   try {
+    if (readButton) {
+      readButton.disabled = true;
+      readButton.textContent = 'Opening…';
+    }
+
+    heading.textContent = book.title || 'eBook Reader';
+
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    frame.src = 'about:blank';
+
     const response = await fetch(
-      `/api/student/ebooks/download?id=${encodeURIComponent(book.id)}`,
+      `/api/student/ebooks/read?id=${encodeURIComponent(book.id)}`,
       {
         method: 'GET',
         credentials: 'same-origin'
@@ -2980,23 +3188,79 @@ async function openBook(bookOrTitle) {
     const result = await response.json();
 
     if (!response.ok) {
-      throw new Error(
-        result.error || 'You could not access this eBook.'
-      );
+      throw new Error(result.error || 'You could not access this eBook.');
+    }
+
+    if (!result.url) {
+      throw new Error('The secure reading link was not returned.');
+    }
+
+    // Only use the short-lived URL returned by the authenticated API.
+    frame.src = result.url;
+  } catch (error) {
+    closeEbookReader();
+
+    alert(
+      error instanceof Error
+        ? error.message
+        : 'Unable to open this eBook. Please try again.'
+    );
+  } finally {
+    if (readButton) {
+      readButton.disabled = false;
+      readButton.textContent = 'Read online';
+    }
+  }
+}
+
+function closeEbookReader() {
+  const modal = document.getElementById('ebook-reader-modal');
+  const frame = document.getElementById('ebook-reader-frame');
+
+  if (frame) frame.src = 'about:blank';
+
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  document.body.style.overflow = '';
+}
+
+async function downloadBook(ebookId) {
+  if (!ebookId) {
+    alert('This eBook could not be identified. Please refresh the library.');
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/student/ebooks/download?id=${encodeURIComponent(ebookId)}`,
+      {
+        method: 'GET',
+        credentials: 'same-origin'
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Unable to download this resource.');
     }
 
     if (!result.url) {
       throw new Error('The secure download link was not returned.');
     }
 
-    // Open only the URL returned by the authenticated server endpoint.
+    // Preserve the existing download API and its access checks.
     window.location.assign(result.url);
   } catch (error) {
     console.error('eBook download failed:', error);
+
     alert(
       error instanceof Error
         ? error.message
-        : 'Unable to open this eBook. Please try again.'
+        : 'Unable to download this resource. Please try again.'
     );
   }
 }
