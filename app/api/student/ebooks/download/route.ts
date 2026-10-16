@@ -18,8 +18,34 @@ export async function GET(request: Request) {
       )
     }
 
+    // Verify the student's account using the existing users table.
+    const { data: student, error: studentError } = await supabase
+      .from('users')
+      .select('id, role, grade, is_active')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (studentError) {
+      console.error('Student lookup error:', studentError)
+      return NextResponse.json(
+        { error: 'Unable to verify your account.' },
+        { status: 500 }
+      )
+    }
+
+    if (
+      !student ||
+      student.role !== 'student' ||
+      student.is_active === false
+    ) {
+      return NextResponse.json(
+        { error: 'An active student account is required.' },
+        { status: 403 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
-    const ebookId = searchParams.get('id')
+    const ebookId = searchParams.get('id')?.trim()
 
     if (!ebookId) {
       return NextResponse.json(
@@ -28,17 +54,17 @@ export async function GET(request: Request) {
       )
     }
 
-    // RLS must permit this user to read the requested eBook.
+    // This query uses the signed-in user's client, so existing RLS applies.
+    // Paid-resource access continues to be enforced by ebooks_read_access.
     const { data: ebook, error: ebookError } = await supabase
       .from('ebooks')
-      .select('id, title, storage_path, is_active')
+      .select('id, title, grade, storage_path, is_active')
       .eq('id', ebookId)
       .eq('is_active', true)
       .maybeSingle()
 
     if (ebookError) {
       console.error('eBook lookup error:', ebookError)
-
       return NextResponse.json(
         { error: 'Unable to verify resource access.' },
         { status: 500 }
@@ -47,23 +73,36 @@ export async function GET(request: Request) {
 
     if (!ebook || !ebook.storage_path) {
       return NextResponse.json(
-        { error: 'Resource unavailable or access denied.' },
+        {
+          error:
+            'This resource is unavailable, has no stored PDF, or you do not have access.'
+        },
         { status: 404 }
       )
     }
 
+    // A null eBook grade means the resource is available to all grades.
+    if (
+      ebook.grade !== null &&
+      ebook.grade !== undefined &&
+      Number(ebook.grade) !== Number(student.grade)
+    ) {
+      return NextResponse.json(
+        { error: 'This eBook is not assigned to your grade.' },
+        { status: 403 }
+      )
+    }
+
+    // Generate a short-lived download link only after access checks pass.
     const { data: signedFile, error: storageError } =
       await supabase.storage
         .from('ebooks')
-        .createSignedUrl(
-          ebook.storage_path,
-          300,
-          { download: true }
-        )
+        .createSignedUrl(ebook.storage_path, 300, {
+          download: true
+        })
 
     if (storageError || !signedFile?.signedUrl) {
       console.error('eBook signing error:', storageError)
-
       return NextResponse.json(
         { error: 'Unable to prepare this download.' },
         { status: 500 }
@@ -72,7 +111,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       url: signedFile.signedUrl,
-      expiresIn: 300,
+      expiresIn: 300
     })
   } catch (error) {
     console.error('eBook download API error:', error)
