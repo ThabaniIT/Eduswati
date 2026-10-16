@@ -2913,18 +2913,47 @@ function openBookFromCard(card) {
   const book = books[index];
   if (book) openBook(book);
 }
-function openBook(bookOrTitle) {
+async function openBook(bookOrTitle) {
   const book = typeof bookOrTitle === 'string'
     ? books.find(b => b.title === bookOrTitle)
     : bookOrTitle;
-  if (!book) return;
 
-  const url = typeof book.file_url === 'string' ? book.file_url.trim() : '';
-  if (url && /^https?:\/\//i.test(url)) {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  if (!book || !book.id) {
+    alert('This eBook could not be identified. Please refresh the library.');
     return;
   }
-  alert('“' + (book.title || 'This eBook') + '” is listed in the library, but its PDF/file link has not been added yet. Please contact your teacher or the EduSwati administrator.');
+
+  try {
+    const response = await fetch(
+      `/api/student/ebooks/download?id=${encodeURIComponent(book.id)}`,
+      {
+        method: 'GET',
+        credentials: 'same-origin'
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.error || 'You could not access this eBook.'
+      );
+    }
+
+    if (!result.url) {
+      throw new Error('The secure download link was not returned.');
+    }
+
+    // Open only the URL returned by the authenticated server endpoint.
+    window.location.assign(result.url);
+  } catch (error) {
+    console.error('eBook download failed:', error);
+    alert(
+      error instanceof Error
+        ? error.message
+        : 'Unable to open this eBook. Please try again.'
+    );
+  }
 }
 
 loadBooks();
