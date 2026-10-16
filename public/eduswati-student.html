@@ -1998,6 +1998,51 @@ body {
   </div>
 </div>
 
+<!-- EduSwati eBook Reader -->
+<div
+  id="ebook-reader-modal"
+  class="ebook-reader-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="ebook-reader-title"
+  aria-hidden="true"
+  hidden
+>
+  <div class="ebook-reader-panel">
+    <div class="ebook-reader-header">
+      <div class="ebook-reader-heading">
+        <strong id="ebook-reader-title">eBook Reader</strong>
+        <span>EduSwati Learning Library</span>
+      </div>
+
+      <button
+        type="button"
+        class="ebook-reader-close"
+        onclick="closeEbookReader()"
+        aria-label="Close eBook reader"
+      >
+        &times; Close
+      </button>
+    </div>
+
+    <div class="ebook-reader-content">
+      <iframe
+        id="ebook-reader-frame"
+        title="eBook PDF reader"
+        src="about:blank"
+        loading="eager"
+      ></iframe>
+
+      <p id="ebook-reader-fallback" hidden>
+        If the PDF does not appear in your browser,
+        use the Download PDF button on the eBook card
+        to read it with your device's PDF viewer.
+      </p>
+    </div>
+  </div>
+</div>
+
+
 <script>
 // ─── STATE ───────────────────────────────────────────────────────────────────
 let APP = {
