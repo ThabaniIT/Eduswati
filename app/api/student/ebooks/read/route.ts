@@ -25,7 +25,7 @@ export async function GET(request: Request) {
       .maybeSingle()
 
     if (studentError) {
-      console.error('Student lookup error:', studentError)
+      console.error(studentError)
       return NextResponse.json(
         { error: 'Unable to verify your account.' },
         { status: 500 }
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
       )
     }
 
-    // Use the signed-in client so the existing ebooks RLS policy applies.
+    // Keep the existing database access policies in force.
     const { data: ebook, error: ebookError } = await supabase
       .from('ebooks')
       .select('id, title, grade, storage_path, is_active')
@@ -62,24 +62,22 @@ export async function GET(request: Request) {
       .maybeSingle()
 
     if (ebookError) {
-      console.error('eBook lookup error:', ebookError)
+      console.error(ebookError)
       return NextResponse.json(
-        { error: 'Unable to verify resource access.' },
+        { error: 'Unable to verify eBook access.' },
         { status: 500 }
       )
     }
 
     if (!ebook || !ebook.storage_path) {
       return NextResponse.json(
-        { error: 'This resource is unavailable or you do not have access.' },
+        { error: 'eBook unavailable or access denied.' },
         { status: 404 }
       )
     }
 
-    // A resource with no grade assigned is available to all grades.
     if (
-      ebook.grade !== null &&
-      ebook.grade !== undefined &&
+      ebook.grade != null &&
       Number(ebook.grade) !== Number(student.grade)
     ) {
       return NextResponse.json(
@@ -88,16 +86,16 @@ export async function GET(request: Request) {
       )
     }
 
-    // No download:true option: allow the PDF to display inline.
+    // Generate a temporary URL for viewing the PDF inline.
     const { data: signedFile, error: storageError } =
       await supabase.storage
         .from('ebooks')
         .createSignedUrl(ebook.storage_path, 300)
 
     if (storageError || !signedFile?.signedUrl) {
-      console.error('eBook reader signing error:', storageError)
+      console.error(storageError)
       return NextResponse.json(
-        { error: 'Unable to open this eBook right now.' },
+        { error: 'Unable to open this eBook.' },
         { status: 500 }
       )
     }
@@ -108,7 +106,8 @@ export async function GET(request: Request) {
       expiresIn: 300,
     })
   } catch (error) {
-    console.error('eBook reader API error:', error)
+    console.error('eBook reader error:', error)
+
     return NextResponse.json(
       { error: 'An unexpected error occurred.' },
       { status: 500 }
