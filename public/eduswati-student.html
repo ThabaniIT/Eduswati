@@ -3177,19 +3177,57 @@ async function openBook(book) {
 
     frame.src = 'about:blank';
 
-    const response = await fetch(
-      `/api/student/ebooks/read?id=${encodeURIComponent(book.id)}`,
-      {
-        method: 'GET',
-        credentials: 'same-origin'
-      }
-    );
+    
+const response = await fetch(
+  `/api/student/ebooks/read?id=${encodeURIComponent(book.id)}`,
+  {
+    method: 'GET',
+    credentials: 'same-origin',
+    headers: {
+      Accept: 'application/json'
+    },
+    cache: 'no-store'
+  }
+);
 
-    const result = await response.json();
+const contentType = response.headers.get('content-type') || '';
+const responseText = await response.text();
 
-    if (!response.ok) {
-      throw new Error(result.error || 'You could not access this eBook.');
-    }
+let result = {};
+
+if (contentType.includes('application/json')) {
+  try {
+    result = JSON.parse(responseText);
+  } catch (parseError) {
+    console.error('Invalid JSON from eBook read API:', {
+      status: response.status,
+      url: response.url,
+      responseText: responseText.slice(0, 500)
+    });
+
+    throw new Error('The eBook reader API returned invalid JSON.');
+  }
+} else {
+  console.error('Expected JSON but received another response type:', {
+    status: response.status,
+    contentType,
+    url: response.url,
+    redirected: response.redirected,
+    responseText: responseText.slice(0, 500)
+  });
+
+  throw new Error(
+    `The reader API returned HTML or another non-JSON response ` +
+    `(HTTP ${response.status}). Check the browser console for details.`
+  );
+}
+
+if (!response.ok) {
+  throw new Error(
+    result.error || `The reader API failed with HTTP ${response.status}.`
+  );
+}
+
 
     if (!result.url) {
       throw new Error('The secure reading link was not returned.');
