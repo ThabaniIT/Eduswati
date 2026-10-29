@@ -1695,8 +1695,12 @@ body {
                   </div>
                   <div class="form-group">
                     <label class="form-label">Phone Number (Optional)</label>
-                    <input class="form-input" id="input-phone" type="tel" placeholder="+268 76 000 000">
+                    <input class="form-input" id="input-phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="+268 76 000 000">
                   </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="input-school-name">School Enrolled (Optional)</label>
+                  <input class="form-input" id="input-school-name" type="text" autocomplete="organization" maxlength="150" placeholder="Enter the name of your school">
                 </div>
                 <div style="display:flex;gap:10px;margin-top:4px">
                   <button class="btn-primary" onclick="saveProfile()" id="btn-save-profile">
@@ -2274,8 +2278,9 @@ function applyProfile() {
   setValue('input-first-name', firstName);
   setValue('input-last-name', lastName);
   setValue('input-email', p.email || p._email || '');
-  setValue('input-grade', p.grade || '');
+  setValue('input-grade', p.grade ?? '');
   setValue('input-phone', p.phone_number || '');
+  setValue('input-school-name', p.school_name || '');
 
   setText('profile-display-name', fullName || 'Student');
   setText('profile-email-display', p.email || p._email || 'Email unavailable');
@@ -2553,6 +2558,8 @@ async function saveProfile() {
   const firstName = document.getElementById('input-first-name')?.value.trim() || '';
   const lastName = document.getElementById('input-last-name')?.value.trim() || '';
   const gradeValue = document.getElementById('input-grade')?.value;
+  const phoneNumber = document.getElementById('input-phone')?.value.trim() || '';
+  const schoolName = document.getElementById('input-school-name')?.value.trim() || '';
   const fullName = `${firstName} ${lastName}`.trim();
 
   if (fullName.length < 2) {
@@ -2575,7 +2582,12 @@ async function saveProfile() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
-      body: JSON.stringify({ full_name: fullName, grade })
+      body: JSON.stringify({
+        full_name: fullName,
+        grade,
+        phone_number: phoneNumber || null,
+        school_name: schoolName || null
+      })
     });
 
     const result = await response.json();
@@ -2593,7 +2605,13 @@ async function saveProfile() {
         email: updatedProfile.email || APP.profile?.email || APP.profile?._email
       };
     } else {
-      APP.profile = { ...APP.profile, full_name: fullName, grade };
+      APP.profile = {
+        ...APP.profile,
+        full_name: fullName,
+        grade,
+        phone_number: phoneNumber || null,
+        school_name: schoolName || null
+      };
     }
 
     applyProfile();
