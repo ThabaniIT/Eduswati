@@ -471,6 +471,50 @@ export async function PATCH(request: Request) {
     updates.grade = grade
   }
 
+  if (Object.prototype.hasOwnProperty.call(body, 'phone_number')) {
+    if (body.phone_number !== null && typeof body.phone_number !== 'string') {
+      return NextResponse.json(
+        { error: 'Phone number must be text.' },
+        { status: 400 }
+      )
+    }
+
+    const phoneNumber =
+      typeof body.phone_number === 'string' ? body.phone_number.trim() : ''
+
+    if (phoneNumber.length > 30) {
+      return NextResponse.json(
+        { error: 'Phone number must be 30 characters or fewer.' },
+        { status: 400 }
+      )
+    }
+
+    // An empty field is stored as NULL.
+    updates.phone_number = phoneNumber || null
+  }
+
+  if (Object.prototype.hasOwnProperty.call(body, 'school_name')) {
+    if (body.school_name !== null && typeof body.school_name !== 'string') {
+      return NextResponse.json(
+        { error: 'School name must be text.' },
+        { status: 400 }
+      )
+    }
+
+    const schoolName =
+      typeof body.school_name === 'string' ? body.school_name.trim() : ''
+
+    if (schoolName.length > 150) {
+      return NextResponse.json(
+        { error: 'School name must be 150 characters or fewer.' },
+        { status: 400 }
+      )
+    }
+
+    // An empty field is stored as NULL.
+    updates.school_name = schoolName || null
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json(
       { error: 'No valid profile changes were provided.' },
